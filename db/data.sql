@@ -1,14 +1,14 @@
 -- 确保使用的是正确的数据库
 -- USE hotel_db;
 
--- 1. 插入测试用户 (密码均为 123456 的 BCrypt 加密值：$2a$10$X.m8Hqp1C2/9T8/y/NfX.uBf9N6Xf9JtO4Xn2t2mYj29tN6mZ.J4q)
+-- 1. 插入测试用户 (密码均为 123456 的 BCrypt 加密值：$2a$10$BQz6cXUarm4lx0BtSAjxuu5U4AN/ovcF75zNzWYXMTcGTCc35i5yi)
 -- 普通用户
 INSERT INTO users (username, password, real_name, phone, role, cancel_count, banned_until, created_at)
-VALUES ('user1', '$2a$10$X.m8Hqp1C2/9T8/y/NfX.uBf9N6Xf9JtO4Xn2t2mYj29tN6mZ.J4q', N'张三', '13800138000', 'USER', 0, NULL, GETDATE());
+VALUES ('user1', '$2a$10$BQz6cXUarm4lx0BtSAjxuu5U4AN/ovcF75zNzWYXMTcGTCc35i5yi', N'张三', '13800138000', 'USER', 0, NULL, GETDATE());
 
 -- 管理员
 INSERT INTO users (username, password, real_name, phone, role, cancel_count, banned_until, created_at)
-VALUES ('admin1', '$2a$10$X.m8Hqp1C2/9T8/y/NfX.uBf9N6Xf9JtO4Xn2t2mYj29tN6mZ.J4q', N'系统管理员', '13900139000', 'ADMIN', 0, NULL, GETDATE());
+VALUES ('admin1', '$2a$10$BQz6cXUarm4lx0BtSAjxuu5U4AN/ovcF75zNzWYXMTcGTCc35i5yi', N'系统管理员', '13900139000', 'ADMIN', 0, NULL, GETDATE());
 
 -- 2. 插入测试房型
 INSERT INTO room_type (name, description, price, total_quantity, image_path, status)
