@@ -101,7 +101,7 @@ git status
 git add .
 
 # 提交到本地仓库，并附带说明信息
-git commit -m "feat: 完成用户登录页面和控制器逻辑"
+git commit -m "完成了模块b"
 ```
 
 #### ④ 推送分支到 GitHub 远程仓库
