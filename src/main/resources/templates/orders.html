@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的订单 - Luxe Stay 酒店预订平台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-color: linear-gradient(90deg, #6366f1, #a855f7);
+            --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-gradient);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .orb {
+            position: absolute;
+            width: 400px; height: 400px;
+            border-radius: 50%; filter: blur(100px);
+            z-index: -1; opacity: 0.3;
+        }
+        .orb-1 { background: #4f46e5; top: -5%; left: -5%; }
+        .orb-2 { background: #c084fc; bottom: -5%; right: -5%; }
+
+        .navbar-custom {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            background: var(--accent-color);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-custom-outline {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #f8fafc;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .btn-custom-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: white;
+        }
+
+        .btn-cancel {
+            border: 1px solid rgba(239, 68, 68, 0.4) !important;
+            color: #fca5a5 !important;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border-color: rgba(239, 68, 68, 0.6) !important;
+            color: #fecaca !important;
+        }
+
+        .btn-book-room {
+            background: var(--accent-color);
+            border: none;
+            border-radius: 12px;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-book-room:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+        }
+
+        .alert-custom {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+        }
+
+        .alert-success-custom {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+        }
+
+        .order-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .order-row:last-child {
+            border-bottom: none;
+        }
+
+        .order-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            margin-left: -1rem;
+            margin-right: -1rem;
+        }
+
+        .badge-status {
+            padding: 0.35rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge-booked {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+        }
+
+        .badge-cancelled {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .badge-completed {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        .order-info-label {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .order-info-value {
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .amount-tag {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #a855f7;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/profile">Luxe Stay</a>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item me-3">
+                        <a class="nav-link" href="/rooms">浏览房型</a>
+                    </li>
+                    <li class="nav-item me-3">
+                        <a class="nav-link active" href="/orders">我的订单</a>
+                    </li>
+                    <li class="nav-item me-3">
+                        <a class="nav-link" href="/profile">个人中心</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-custom-outline" href="/logout" style="border-color: rgba(239,68,68,0.4); color: #fca5a5;">退出登录</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 2rem; margin-bottom: 3rem;">
+        <div class="glass-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0" style="color: #e2e8f0;">我的订单</h4>
+                <a href="/rooms" class="btn-book-room">预订新房型</a>
+            </div>
+
+            <!-- 操作提示 -->
+            <div th:if="${success}" class="alert-success-custom mb-3" th:text="${success}"></div>
+            <div th:if="${error}" class="alert-custom mb-3" th:text="${error}"></div>
+            <div th:if="${param.success != null}" class="alert-success-custom mb-3" th:text="${param.success}"></div>
+            <div th:if="${param.error != null}" class="alert-custom mb-3" th:text="${param.error}"></div>
+
+            <!-- 空状态 -->
+            <div th:if="${orders == null || orders.empty}" class="text-center py-5">
+                <div style="font-size: 4rem; opacity: 0.3;">&#128218;</div>
+                <p class="mt-3" style="color: #94a3b8;">暂无订单记录</p>
+                <a href="/rooms" class="btn-book-room mt-2">去预订房间</a>
+            </div>
+
+            <!-- 订单列表 -->
+            <div th:each="order : ${orders}">
+                <div class="order-row">
+                    <div class="row align-items-center">
+                        <div class="col-lg-2">
+                            <div class="order-info-label">订单编号</div>
+                            <div class="order-info-value" style="font-family: monospace; font-size: 0.85rem;"
+                                 th:text="${order.orderNo}">ORD202607131430001234</div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="order-info-label">房型</div>
+                            <div class="order-info-value fw-bold" th:text="${order.roomType.name}">标准双人间</div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="order-info-label">入住 / 离店</div>
+                            <div class="order-info-value">
+                                <span th:text="${order.checkInDate}">2026-07-13</span> ~ <span th:text="${order.checkOutDate}">2026-07-15</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-1">
+                            <div class="order-info-label">数量</div>
+                            <div class="order-info-value" th:text="${order.quantity} + ' 间'">1 间</div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="order-info-label">金额</div>
+                            <div>
+                                <span class="amount-tag" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')}">398.00</span>
+                                <span style="color: #94a3b8; font-size: 0.8rem;"> 元</span>
+                            </div>
+                            <div style="color: #64748b; font-size: 0.75rem;">
+                                单价 <span th:text="${#numbers.formatDecimal(order.unitPrice, 0, 'COMMA', 2, 'POINT')}">199.00</span> 元/晚
+                            </div>
+                        </div>
+                        <div class="col-lg-1 text-center">
+                            <span th:if="${order.status == 'BOOKED'}" class="badge-status badge-booked">已预订</span>
+                            <span th:if="${order.status == 'CANCELLED'}" class="badge-status badge-cancelled">已取消</span>
+                            <span th:if="${order.status == 'COMPLETED'}" class="badge-status badge-completed">已完成</span>
+                        </div>
+                        <div class="col-lg-2 text-end">
+                            <form th:if="${order.status == 'BOOKED' && today.isBefore(order.checkInDate)}"
+                                  th:action="@{/orders/{id}/cancel(id=${order.id})}" method="POST"
+                                  onsubmit="return confirm('确定要取消此订单吗？取消后将计入您的取消次数（累计3次将被禁订7天）。')">
+                                <button type="submit" class="btn-custom-outline btn-cancel w-100">取消订单</button>
+                            </form>
+                            <span th:if="${order.status == 'BOOKED' && !today.isBefore(order.checkInDate)}"
+                                  class="text-muted" style="font-size: 0.8rem; color: #64748b;">
+                                已过取消时限
+                            </span>
+                            <span th:if="${order.status == 'CANCELLED'}" style="color: #64748b; font-size: 0.8rem;">
+                                取消于 <span th:text="${#temporals.format(order.cancelledAt, 'MM-dd HH:mm')}">07-13 14:30</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
