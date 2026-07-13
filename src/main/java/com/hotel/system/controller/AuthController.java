@@ -30,10 +30,10 @@ public class AuthController {
         try {
             User user = userService.login(username, password);
             session.setAttribute("currentUser", user);
-            
-            // 如果是管理员，进入管理端（先做重定向，实际开发中管理员可能会有特定主页）
+
+            // 如果是管理员，跳转到后台房型管理首页
             if ("ADMIN".equals(user.getRole())) {
-                return "redirect:/admin/test";
+                return "redirect:/admin/room";
             }
             return "redirect:/profile";
         } catch (IllegalArgumentException e) {
@@ -75,10 +75,10 @@ public class AuthController {
         if (currentUser == null) {
             return "redirect:/login";
         }
-        
+
         // 实时刷新信用禁订状态
         userService.checkAndUpdateBannedStatus(currentUser);
-        
+
         model.addAttribute("user", currentUser);
         return "profile";
     }
@@ -86,13 +86,5 @@ public class AuthController {
     @GetMapping("/403")
     public String forbiddenPage() {
         return "403";
-    }
-
-    // 辅助测试：模拟管理员后台路径，用来验证普通用户越权拦截
-    @GetMapping("/admin/test")
-    @ResponseBody
-    public String adminTest(HttpSession session) {
-        User currentUser = (User) session.getAttribute("currentUser");
-        return "Hello Admin! Current user: " + (currentUser != null ? currentUser.getRealName() : "Anonymous");
     }
 }

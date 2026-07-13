@@ -87,7 +87,9 @@ git checkout main
 git pull origin main
 
 # 基于最新的 main 分支，创建并切换到你自己的分支（如 feature/user）
-git checkout -b feature/user
+git checkout  feature/room
+git checkout -b feature/room
+
 ```
 
 #### ③ 编写代码并提交到本地仓库
@@ -99,13 +101,13 @@ git status
 git add .
 
 # 提交到本地仓库，并附带说明信息
-git commit -m "feat: 完成用户登录页面和控制器逻辑"
+git commit -m "完成了模块b"
 ```
 
 #### ④ 推送分支到 GitHub 远程仓库
 ```bash
 # 将你的本地分支推送到 GitHub（第一次推送时需要 -u，后续直接 git push）
-git push -u origin feature/user
+git push -u origin feature/room
 ```
 
 ---

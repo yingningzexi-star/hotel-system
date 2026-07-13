@@ -1,7 +1,13 @@
 package com.hotel.system.config;
 
+import com.hotel.system.entity.User;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -14,12 +20,22 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/login",         // 登录页
                         "/register",      // 注册页
-                        "/api/auth/**",   // 登录注册接口
+                        "/rooms",         // 房型浏览（未登录可看）
+                        "/rooms/**",      // 房型详情
                         "/css/**",        // 静态资源
                         "/js/**",
                         "/images/**",
                         "/error",         // 默认错误页
                         "/403"            // 403越权提示页
                 );
+    }
+
+    /**
+     * 配置静态资源映射，使 /images/** 指向 classpath:/static/images/
+     */
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("classpath:/static/images/");
     }
 }

@@ -193,6 +193,16 @@
             border-color: rgba(239, 68, 68, 0.6);
             color: white;
         }
+
+        .btn-admin-custom {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fde047;
+        }
+        .btn-admin-custom:hover {
+            background: rgba(245, 158, 11, 0.3);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -204,7 +214,7 @@
     <!-- 顶部导航栏 -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container">
-            <a class="navbar-brand" href="#">Luxe Stay</a>
+            <a class="navbar-brand" href="/rooms">Luxe Stay</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -281,11 +291,17 @@
                     </div>
 
                     <!-- 功能导航 -->
-                    <div class="d-flex justify-content-center gap-3 mt-5">
-                        <a href="/rooms" class="btn-custom-outline">浏览可用房型</a>
-                        <a href="/orders" class="btn-custom-outline">查看我的订单</a>
-                        <!-- 若是管理员，提供测试拦截按钮 -->
-                        <a th:if="${user.role == 'ADMIN'}" th:href="@{/admin/test}" class="btn-custom-outline btn-danger-custom" target="_blank">测试管理员后台</a>
+                    <div class="d-flex justify-content-center gap-3 mt-5 flex-wrap">
+                        <a th:href="@{/rooms}" class="btn-custom-outline">
+                            <i class="bi bi-building"></i> 浏览可用房型
+                        </a>
+                        <a href="#" class="btn-custom-outline" onclick="alert('订单功能由 C 成员开发中，敬请期待！');">
+                            <i class="bi bi-receipt"></i> 查看我的订单
+                        </a>
+                        <!-- 管理员快捷入口 -->
+                        <a th:if="${user.role == 'ADMIN'}" th:href="@{/admin/room}" class="btn-custom-outline btn-admin-custom">
+                            <i class="bi bi-gear"></i> 管理后台
+                        </a>
                     </div>
                 </div>
             </div>

@@ -3,17 +3,15 @@ spring:
     url: jdbc:sqlserver://localhost:1433;databaseName=hotel_db;encrypt=true;trustServerCertificate=true;
     username: hotel_app
     password: Password123!
-    
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-  
+
   jpa:
     hibernate:
-      ddl-auto: update # 自动根据 JPA 实体类同步/更新表结构
-    show-sql: true     # 控制台打印 SQL 语句
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.SQLServerDialect
-  
+
   thymeleaf:
-    cache: false # 开发阶段关闭 Thymeleaf 模板缓存，修改页面后刷新即可生效
+    cache: false
