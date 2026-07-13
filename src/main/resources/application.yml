@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:sqlserver://localhost;instanceName=SQLEXPRESS;databaseName=hotel_db;encrypt=true;trustServerCertificate=true;
+    url: jdbc:sqlserver://localhost:1433;databaseName=hotel_db;encrypt=true;trustServerCertificate=true;
     username: hotel_app
     password: Password123!
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver

@@ -4,7 +4,7 @@
 -- 1. 插入测试用户 (密码均为 123456 的 BCrypt 加密值：$2a$10$BQz6cXUarm4lx0BtSAjxuu5U4AN/ovcF75zNzWYXMTcGTCc35i5yi)
 -- 普通用户
 INSERT INTO users (username, password, real_name, phone, role, cancel_count, banned_until, created_at)
-VALUES ('user1', '$2a$10$BQz6cXUarm4lx0BtSAjxuu5U4AN/ovcF75zNzWYXMTcGTCc35i5yi', N'张三', '13800138000', 'USER', 0, NULL, GETDATE());
+VALUES ('user2', '$2a$10$BQz6cXUarm4lx0BtSAjxuu5U4AN/ovcF75zNzWYXMTcGTCc35i5yi', N'张三', '13800138000', 'USER', 0, NULL, GETDATE());
 
 -- 管理员
 INSERT INTO users (username, password, real_name, phone, role, cancel_count, banned_until, created_at)
