@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${isEdit} ? '编辑房型' : '新增房型' + ' - Luxe Stay 管理后台'">房型表单</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-gradient: linear-gradient(90deg, #6366f1, #a855f7);
+            --font-family: 'Outfit', -apple-system, sans-serif;
+        }
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-gradient);
+            color: #f8fafc;
+            min-height: 100vh;
+            position: relative;
+        }
+        .orb {
+            position: fixed; width: 500px; height: 500px; border-radius: 50%;
+            filter: blur(100px); z-index: -1; opacity: 0.25;
+        }
+        .orb-1 { background: #4f46e5; top: -10%; left: -10%; }
+        .orb-2 { background: #c084fc; bottom: -10%; right: -10%; }
+
+        .navbar-custom {
+            background: rgba(15,23,42,0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+
+        .main-container { margin-top: 2rem; margin-bottom: 3rem; }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-weight: 800;
+            font-size: 1.6rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-label {
+            color: #cbd5e1;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.7rem 1rem;
+            color: #f8fafc;
+            transition: all 0.3s;
+        }
+        .form-control:focus, .form-select:focus {
+            background: rgba(0,0,0,0.3);
+            border-color: #a855f7;
+            box-shadow: 0 0 12px rgba(168,85,247,0.2);
+            color: #f8fafc;
+        }
+        .form-control::placeholder { color: #475569; }
+        .form-select option { background: #1e1b4b; color: #f8fafc; }
+
+        textarea.form-control { resize: vertical; min-height: 100px; }
+
+        .btn-glass {
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: #cbd5e1;
+            background: rgba(255,255,255,0.03);
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-glass:hover {
+            background: rgba(255,255,255,0.08);
+            color: #f8fafc;
+        }
+        .btn-submit {
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 0.7rem 2rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+            color: white;
+        }
+
+        .alert-glass-danger {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-text-custom {
+            color: #64748b;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/admin/room">Luxe Stay · 管理后台</a>
+            <div class="d-flex">
+                <a class="btn btn-sm btn-glass me-2" th:href="@{/profile}">
+                    <i class="bi bi-person"></i> <span th:text="${currentUser.realName}">管理员</span>
+                </a>
+                <a class="btn btn-sm btn-glass" th:href="@{/admin/room}">
+                    <i class="bi bi-arrow-left"></i> 返回列表
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        <div class="glass-card">
+            <div class="page-title mb-4" th:text="${isEdit} ? '✏️ 编辑房型' : '➕ 新增房型'">
+                房型表单
+            </div>
+
+            <div th:if="${error}" class="alert-glass-danger" th:text="${error}"></div>
+
+            <!-- 表单 -->
+            <form th:action="${isEdit} ? @{/admin/room/edit} : @{/admin/room/create}"
+                  method="POST">
+
+                <!-- ID 隐藏字段（编辑时使用） -->
+                <input type="hidden" name="id" th:value="${roomType.id}" th:if="${isEdit}">
+
+                <!-- 房型名称 -->
+                <div class="mb-3">
+                    <label class="form-label">房型名称 <span style="color:#ef4444;">*</span></label>
+                    <input type="text" class="form-control" name="name"
+                           th:value="${roomType.name}" placeholder="如：标准双人间、豪华大床房" required>
+                </div>
+
+                <!-- 房型描述 -->
+                <div class="mb-3">
+                    <label class="form-label">房型描述</label>
+                    <textarea class="form-control" name="description"
+                              placeholder="描述房型的特色、设施、服务等">[[${roomType.description}]]</textarea>
+                    <div class="form-text-custom">支持中文描述，建议包含床型、面积、设施等关键信息</div>
+                </div>
+
+                <!-- 价格 -->
+                <div class="mb-3">
+                    <label class="form-label">单价（元/晚）<span style="color:#ef4444;">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background:rgba(0,0,0,0.2);border:1px solid var(--glass-border);color:#94a3b8;">¥</span>
+                        <input type="number" class="form-control" name="price"
+                               th:value="${roomType.price}" step="0.01" min="0" placeholder="199.00" required>
+                    </div>
+                </div>
+
+                <!-- 总房间数 -->
+                <div class="mb-3">
+                    <label class="form-label">总房间数 <span style="color:#ef4444;">*</span></label>
+                    <input type="number" class="form-control" name="totalQuantity"
+                           th:value="${roomType.totalQuantity}" min="1" placeholder="10" required>
+                    <div class="form-text-custom">该房型的总房间数量，新增后将自动生成等量的每日库存</div>
+                </div>
+
+                <!-- 图片路径 -->
+                <div class="mb-3">
+                    <label class="form-label">图片路径</label>
+                    <input type="text" class="form-control" name="imagePath"
+                           th:value="${roomType.imagePath}" placeholder="/images/room_standard.jpg">
+                    <div class="form-text-custom">房型展示图片的相对路径，建议放置在 static/images/ 目录下</div>
+                </div>
+
+                <!-- 状态 -->
+                <div class="mb-4">
+                    <label class="form-label">状态</label>
+                    <select class="form-select" name="status">
+                        <option value="1" th:selected="${roomType.status == 1}">启用（可预订）</option>
+                        <option value="0" th:selected="${roomType.status == 0}">禁用（下架）</option>
+                    </select>
+                </div>
+
+                <!-- 提交按钮 -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-submit">
+                        <i class="bi bi-check-lg"></i>
+                        <span th:text="${isEdit} ? '保存修改' : '确认创建'"></span>
+                    </button>
+                    <a th:href="@{/admin/room}" class="btn btn-glass">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

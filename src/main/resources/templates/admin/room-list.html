@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房型管理 - Luxe Stay 管理后台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-gradient: linear-gradient(90deg, #6366f1, #a855f7);
+            --font-family: 'Outfit', -apple-system, sans-serif;
+        }
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-gradient);
+            color: #f8fafc;
+            min-height: 100vh;
+            position: relative;
+        }
+        .orb {
+            position: fixed; width: 500px; height: 500px; border-radius: 50%;
+            filter: blur(100px); z-index: -1; opacity: 0.25;
+        }
+        .orb-1 { background: #4f46e5; top: -10%; left: -10%; }
+        .orb-2 { background: #c084fc; bottom: -10%; right: -10%; }
+
+        /* 导航 */
+        .navbar-custom {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+        .nav-link-custom {
+            color: #94a3b8 !important;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-radius: 10px;
+            padding: 0.5rem 1rem !important;
+        }
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: #f8fafc !important;
+            background: rgba(255,255,255,0.05);
+        }
+        .nav-link-custom i { margin-right: 6px; }
+
+        /* 主内容 */
+        .main-container { margin-top: 2rem; margin-bottom: 3rem; }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            transition: border-color 0.3s;
+        }
+        .glass-card:hover { border-color: rgba(255,255,255,0.12); }
+
+        .page-title {
+            font-weight: 800;
+            font-size: 1.8rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 表格 */
+        .table-custom {
+            color: #e2e8f0;
+            margin-bottom: 0;
+        }
+        .table-custom thead th {
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1rem 0.75rem;
+        }
+        .table-custom tbody td {
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            padding: 0.9rem 0.75rem;
+            vertical-align: middle;
+        }
+        .table-custom tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .badge-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-active {
+            background: rgba(34,197,94,0.15);
+            border: 1px solid rgba(34,197,94,0.35);
+            color: #86efac;
+        }
+        .badge-disabled {
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.35);
+            color: #fca5a5;
+        }
+
+        .btn-glass {
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: #cbd5e1;
+            background: rgba(255,255,255,0.03);
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-glass:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.2);
+            color: #f8fafc;
+        }
+        .btn-glass-primary {
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            border: none;
+            color: white;
+        }
+        .btn-glass-primary:hover {
+            opacity: 0.9;
+            color: white;
+            transform: translateY(-1px);
+        }
+        .btn-glass-danger {
+            border-color: rgba(239,68,68,0.4);
+            color: #fca5a5;
+        }
+        .btn-glass-danger:hover {
+            background: rgba(239,68,68,0.15);
+            color: #fca5a5;
+        }
+        .btn-glass-success {
+            border-color: rgba(34,197,94,0.4);
+            color: #86efac;
+        }
+        .btn-glass-success:hover {
+            background: rgba(34,197,94,0.15);
+            color: #86efac;
+        }
+
+        .search-box {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.6rem 1rem;
+            color: #f8fafc;
+            width: 100%;
+        }
+        .search-box:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 10px rgba(168,85,247,0.2);
+            outline: none;
+        }
+        .search-box::placeholder { color: #64748b; }
+
+        /* 提示消息 */
+        .alert-glass {
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            border: 1px solid;
+        }
+        .alert-glass-success {
+            background: rgba(34,197,94,0.1);
+            border-color: rgba(34,197,94,0.3);
+            color: #86efac;
+        }
+        .alert-glass-danger {
+            background: rgba(239,68,68,0.1);
+            border-color: rgba(239,68,68,0.3);
+            color: #fca5a5;
+        }
+
+        .price-text {
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- 导航 -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/admin/room">Luxe Stay · 管理后台</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="adminNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom active" th:href="@{/admin/room}">
+                            <i class="bi bi-building"></i>房型管理
+                        </a>
+                    </li>
+                    <!-- 后续 A/C 成员可在此添加菜单项 -->
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item d-flex align-items-center">
+                        <span class="text-light me-3" style="font-size:0.9rem;">
+                            <i class="bi bi-shield-check me-1"></i>
+                            <span th:text="${currentUser.realName}">管理员</span>
+                        </span>
+                        <a class="btn btn-sm btn-glass" th:href="@{/profile}">
+                            <i class="bi bi-person"></i> 个人中心
+                        </a>
+                        <a class="btn btn-sm btn-glass-danger ms-2" th:href="@{/logout}">
+                            <i class="bi bi-box-arrow-right"></i> 退出
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container main-container">
+        <div class="glass-card">
+            <!-- 标题栏 -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <div class="page-title">房型管理</div>
+                    <p class="text-secondary mt-1 mb-0" style="font-size:0.9rem; color:#94a3b8 !important;">
+                        管理酒店的所有房型信息、价格与状态
+                    </p>
+                </div>
+                <a th:href="@{/admin/room/create}" class="btn btn-glass-primary">
+                    <i class="bi bi-plus-lg"></i> 新增房型
+                </a>
+            </div>
+
+            <!-- 提示消息 -->
+            <div th:if="${success}" class="alert-glass alert-glass-success mb-4" th:text="${success}"></div>
+            <div th:if="${error}" class="alert-glass alert-glass-danger mb-4" th:text="${error}"></div>
+
+            <!-- 搜索栏 -->
+            <form th:action="@{/admin/room}" method="GET" class="mb-4">
+                <div class="row g-2">
+                    <div class="col-md-8">
+                        <input type="text" class="search-box" name="keyword"
+                               th:value="${keyword}" placeholder="🔍 搜索房型名称...">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-glass w-100">搜索</button>
+                    </div>
+                    <div class="col-md-2">
+                        <a th:href="@{/admin/room}" class="btn btn-glass w-100">
+                            <i class="bi bi-arrow-counterclockwise"></i> 重置
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- 房型表格 -->
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>房型名称</th>
+                            <th>描述</th>
+                            <th>单价 (元/晚)</th>
+                            <th>总房间数</th>
+                            <th>状态</th>
+                            <th style="width:260px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="room : ${roomTypes}">
+                            <td><span style="color:#64748b;" th:text="${room.id}">1</span></td>
+                            <td>
+                                <strong th:text="${room.name}">标准双人间</strong>
+                            </td>
+                            <td style="color:#94a3b8; max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
+                                th:text="${room.description}">描述文本</td>
+                            <td>
+                                <span class="price-text" th:text="'¥' + ${#numbers.formatDecimal(room.price, 1, 2)}">¥199.00</span>
+                            </td>
+                            <td><span th:text="${room.totalQuantity}">10</span></td>
+                            <td>
+                                <span th:if="${room.status == 1}" class="badge-status badge-active">
+                                    <i class="bi bi-check-circle-fill me-1" style="font-size:0.6rem;"></i>启用
+                                </span>
+                                <span th:if="${room.status == 0}" class="badge-status badge-disabled">
+                                    <i class="bi bi-x-circle-fill me-1" style="font-size:0.6rem;"></i>禁用
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <!-- 库存管理 -->
+                                    <a th:href="@{/admin/room/inventory/{id}(id=${room.id})}"
+                                       class="btn btn-glass btn-glass-success btn-sm">
+                                        <i class="bi bi-box-seam"></i> 库存
+                                    </a>
+                                    <!-- 编辑 -->
+                                    <a th:href="@{/admin/room/edit/{id}(id=${room.id})}"
+                                       class="btn btn-glass btn-sm">
+                                        <i class="bi bi-pencil"></i> 编辑
+                                    </a>
+                                    <!-- 启用/禁用切换 -->
+                                    <form th:action="@{/admin/room/toggle/{id}(id=${room.id})}"
+                                          method="POST" style="display:inline;">
+                                        <button type="submit"
+                                                th:classappend="${room.status == 1} ? 'btn-glass-danger' : 'btn-glass-success'"
+                                                class="btn btn-glass btn-sm">
+                                            <i th:class="${room.status == 1} ? 'bi bi-pause-circle' : 'bi bi-play-circle'"></i>
+                                            <span th:text="${room.status == 1} ? '禁用' : '启用'"></span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- 无数据 -->
+                        <tr th:if="${#lists.isEmpty(roomTypes)}">
+                            <td colspan="7" class="text-center py-5" style="color:#64748b;">
+                                <i class="bi bi-inbox" style="font-size:2rem; display:block; margin-bottom:0.5rem;"></i>
+                                暂无房型数据，点击右上角「新增房型」开始创建
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

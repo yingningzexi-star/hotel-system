@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#1e1b4b" rx="12"/>
+  <rect x="50" y="30" width="300" height="200" rx="8" fill="rgba(99,102,241,0.15)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <!-- 酒店建筑简图 -->
+  <rect x="130" y="70" width="140" height="120" rx="4" fill="rgba(168,85,247,0.2)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <rect x="160" y="100" width="25" height="30" rx="2" fill="rgba(255,255,255,0.15)"/>
+  <rect x="215" y="100" width="25" height="30" rx="2" fill="rgba(255,255,255,0.15)"/>
+  <rect x="160" y="140" width="25" height="30" rx="2" fill="rgba(255,255,255,0.15)"/>
+  <rect x="215" y="140" width="25" height="30" rx="2" fill="rgba(255,255,255,0.15)"/>
+  <rect x="155" y="60" width="90" height="16" rx="3" fill="rgba(217,70,239,0.3)"/>
+  <rect x="180" y="56" width="40" height="8" rx="2" fill="rgba(217,70,239,0.2)"/>
+  <text x="200" y="240" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit, sans-serif" font-size="14">Luxe Stay</text>
+</svg>

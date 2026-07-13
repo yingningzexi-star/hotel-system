@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>库存管理 - <span th:text="${roomType.name}">标准双人间</span></title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-gradient: linear-gradient(90deg, #6366f1, #a855f7);
+            --font-family: 'Outfit', -apple-system, sans-serif;
+        }
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-gradient);
+            color: #f8fafc;
+            min-height: 100vh;
+            position: relative;
+        }
+        .orb {
+            position: fixed; width: 500px; height: 500px; border-radius: 50%;
+            filter: blur(100px); z-index: -1; opacity: 0.25;
+        }
+        .orb-1 { background: #4f46e5; top: -10%; left: -10%; }
+        .orb-2 { background: #c084fc; bottom: -10%; right: -10%; }
+
+        .navbar-custom {
+            background: rgba(15,23,42,0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+
+        .main-container { margin-top: 2rem; margin-bottom: 3rem; }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .page-title {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .table-custom { color: #e2e8f0; margin-bottom: 0; }
+        .table-custom thead th {
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.9rem 0.75rem;
+        }
+        .table-custom tbody td {
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            padding: 0.8rem 0.75rem;
+            vertical-align: middle;
+        }
+        .table-custom tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .table-custom tbody tr.today-row {
+            background: rgba(99,102,241,0.06);
+            border-left: 3px solid #6366f1;
+        }
+
+        .qty-input {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #f8fafc;
+            padding: 0.35rem 0.6rem;
+            width: 80px;
+            text-align: center;
+        }
+        .qty-input:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 8px rgba(168,85,247,0.2);
+            outline: none;
+        }
+
+        .btn-glass {
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: #cbd5e1;
+            background: rgba(255,255,255,0.03);
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-glass:hover { background: rgba(255,255,255,0.08); color: #f8fafc; }
+        .btn-glass-primary {
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+        }
+        .btn-glass-primary:hover { opacity: 0.9; color: white; }
+
+        .badge-date {
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+        .badge-today {
+            background: rgba(99,102,241,0.2);
+            color: #818cf8;
+            border: 1px solid rgba(99,102,241,0.3);
+        }
+
+        .alert-glass-success {
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: #86efac;
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+        }
+        .alert-glass-danger {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+        }
+        .room-info-box {
+            background: rgba(0,0,0,0.15);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .room-info-label { color: #64748b; font-size: 0.8rem; }
+        .room-info-value { color: #e2e8f0; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/admin/room">Luxe Stay · 管理后台</a>
+            <div class="d-flex">
+                <a class="btn btn-sm btn-glass me-2" th:href="@{/admin/room}">
+                    <i class="bi bi-arrow-left"></i> 返回房型列表
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        <!-- 房型信息摘要 -->
+        <div class="glass-card mb-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="page-title">
+                        <i class="bi bi-box-seam me-2"></i>
+                        <span th:text="${roomType.name}">标准双人间</span>
+                        <span style="font-size:0.8rem; -webkit-text-fill-color:#64748b; background:none;"
+                              th:text="'#' + ${roomType.id}"></span>
+                    </div>
+                    <div class="room-info-box mt-3">
+                        <div class="row text-center">
+                            <div class="col">
+                                <div class="room-info-label">单价</div>
+                                <div class="room-info-value" th:text="'¥' + ${#numbers.formatDecimal(roomType.price, 1, 2)}">199.00</div>
+                            </div>
+                            <div class="col">
+                                <div class="room-info-label">总房间数</div>
+                                <div class="room-info-value" th:text="${roomType.totalQuantity}">10</div>
+                            </div>
+                            <div class="col">
+                                <div class="room-info-label">状态</div>
+                                <div class="room-info-value">
+                                    <span th:if="${roomType.status == 1}" style="color:#86efac;">● 启用</span>
+                                    <span th:if="${roomType.status == 0}" style="color:#fca5a5;">● 禁用</span>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="room-info-label">描述</div>
+                                <div class="room-info-value" style="font-size:0.85rem; color:#94a3b8;"
+                                     th:text="${roomType.description}">描述</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 提示 -->
+        <div th:if="${success}" class="alert-glass-success mb-4" th:text="${success}"></div>
+        <div th:if="${error}" class="alert-glass-danger mb-4" th:text="${error}"></div>
+
+        <!-- 库存表格 -->
+        <div class="glass-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0" style="color:#e2e8f0;">
+                    <i class="bi bi-calendar3 me-2"></i>每日库存记录
+                    <span style="font-size:0.8rem; color:#64748b; font-weight:400;">
+                        (共 <span th:text="${#lists.size(inventories)}">0</span> 天)
+                    </span>
+                </h5>
+
+                <!-- 补充库存按钮 -->
+                <form th:action="@{/admin/room/inventory/generate}" method="POST" class="d-flex gap-2 align-items-center">
+                    <input type="hidden" name="roomTypeId" th:value="${roomType.id}">
+                    <div class="input-group" style="max-width:200px;">
+                        <input type="number" class="form-control" name="days" value="30" min="1" max="365"
+                               style="background:rgba(0,0,0,0.2);border:1px solid var(--glass-border);color:#f8fafc;border-radius:8px 0 0 8px;padding:0.3rem 0.6rem;font-size:0.85rem;">
+                        <button type="submit" class="btn btn-glass-primary" style="border-radius:0 8px 8px 0;padding:0.3rem 0.8rem;font-size:0.85rem;">
+                            <i class="bi bi-plus-circle"></i> 补充
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive" style="max-height:600px; overflow-y:auto;">
+                <table class="table table-custom">
+                    <thead style="position:sticky; top:0; background:#0f172a;">
+                        <tr>
+                            <th>日期</th>
+                            <th>星期</th>
+                            <th>今日/未来</th>
+                            <th>可用数量</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="inv : ${inventories}"
+                            th:classappend="${inv.inventoryDate == today} ? 'today-row' : ''">
+                            <td>
+                                <span class="badge-date" th:text="${#temporals.format(inv.inventoryDate, 'yyyy-MM-dd')}">2026-07-13</span>
+                            </td>
+                            <td style="color:#64748b; font-size:0.85rem;">
+                                <span th:if="${inv.inventoryDate.dayOfWeek.name() == 'MONDAY'}">周一</span>
+                                <span th:if="${inv.inventoryDate.dayOfWeek.name() == 'TUESDAY'}">周二</span>
+                                <span th:if="${inv.inventoryDate.dayOfWeek.name() == 'WEDNESDAY'}">周三</span>
+                                <span th:if="${inv.inventoryDate.dayOfWeek.name() == 'THURSDAY'}">周四</span>
+                                <span th:if="${inv.inventoryDate.dayOfWeek.name() == 'FRIDAY'}">周五</span>
+                                <span th:if="${inv.inventoryDate.dayOfWeek.name() == 'SATURDAY'}">周六</span>
+                                <span th:if="${inv.inventoryDate.dayOfWeek.name() == 'SUNDAY'}">周日</span>
+                            </td>
+                            <td>
+                                <span th:if="${inv.inventoryDate == today}" class="badge-date badge-today">今日</span>
+                                <span th:if="${inv.inventoryDate.isBefore(today)}" style="color:#64748b; font-size:0.8rem;">已过期</span>
+                                <span th:if="${inv.inventoryDate.isAfter(today)}" style="color:#64748b; font-size:0.8rem;">
+                                    <span th:text="${#temporals.format(inv.inventoryDate, 'MM-dd')}">07-14</span> 起可预订
+                                </span>
+                            </td>
+                            <td>
+                                <span th:text="${inv.availableQuantity}" style="font-weight:600; font-size:1.1rem;">10</span>
+                                <span style="color:#64748b; font-size:0.8rem;" th:text="' / ' + ${roomType.totalQuantity}"></span>
+                                <!-- 库存进度条 -->
+                                <div class="progress mt-1" style="height:4px; background:rgba(255,255,255,0.06);">
+                                    <div class="progress-bar" role="progressbar"
+                                         th:style="'width:' + (${inv.availableQuantity} * 100 / ${roomType.totalQuantity}) + '%'"
+                                         th:classappend="${inv.availableQuantity == 0} ? 'bg-danger' : (inv.availableQuantity <= roomType.totalQuantity / 3 ? 'bg-warning' : 'bg-success')"
+                                         style="border-radius:2px;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/room/inventory/update}" method="POST"
+                                      class="d-flex gap-2 align-items-center">
+                                    <input type="hidden" name="inventoryId" th:value="${inv.id}">
+                                    <input type="hidden" name="roomTypeId" th:value="${roomType.id}">
+                                    <input type="number" class="qty-input" name="availableQuantity"
+                                           th:value="${inv.availableQuantity}" min="0"
+                                           th:max="${roomType.totalQuantity}">
+                                    <button type="submit" class="btn btn-glass btn-sm">
+                                        <i class="bi bi-check"></i> 更新
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(inventories)}">
+                            <td colspan="5" class="text-center py-5" style="color:#64748b;">
+                                <i class="bi bi-inbox" style="font-size:2rem; display:block; margin-bottom:0.5rem;"></i>
+                                暂无库存数据，点击右上角「补充」生成未来库存
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
