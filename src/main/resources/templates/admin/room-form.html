@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${isEdit} ? '编辑房型' : '新增房型' + ' - Luxe Stay 管理后台'">房型表单</title>
+    <title th:text="${isEdit} ? '编辑房型 - Luxe Stay 管理后台' : '新增房型 - Luxe Stay 管理后台'">房型表单</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -180,7 +180,8 @@
                 <div class="mb-3">
                     <label class="form-label">房型描述</label>
                     <textarea class="form-control" name="description"
-                              placeholder="描述房型的特色、设施、服务等">[[${roomType.description}]]</textarea>
+                              placeholder="描述房型的特色、设施、服务等"
+                              th:text="${roomType.description}"></textarea>
                     <div class="form-text-custom">支持中文描述，建议包含床型、面积、设施等关键信息</div>
                 </div>
 

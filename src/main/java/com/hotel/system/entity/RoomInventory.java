@@ -8,9 +8,7 @@ import java.time.LocalDate;
 
 /**
  * 每日库存实体 — 对应数据库 room_inventory 表
- * B成员负责：每日库存的配置与管理
- *
- * 核心业务规则：
+ * 核心规则：
  * - 每日库存 = 该房型当日可预订的房间数
  * - (room_type_id, inventory_date) 联合唯一，确保同一天同一房型只有一条库存记录
  * - 预订时逐日扣减，取消时逐日恢复

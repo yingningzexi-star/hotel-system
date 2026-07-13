@@ -25,7 +25,7 @@ public class RoomType {
     @Column(nullable = false, length = 100)
     private String name;
 
-    /** 房型描述，支持中文 */
+    /** 房型描述 */
     @Column(length = 500)
     private String description;
 
