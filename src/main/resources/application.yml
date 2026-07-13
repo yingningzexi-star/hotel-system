@@ -1,12 +1,8 @@
 spring:
   datasource:
-    # 默认使用 Windows 身份验证 (integratedSecurity=true)
-    url: jdbc:sqlserver://localhost:1433;databaseName=hotel_db;integratedSecurity=true;encrypt=true;trustServerCertificate=true;
-    
-    # 如果后续需要使用 SQL Login (sa 账户)，请注释掉上面的 url 并启用下面的配置：
-    # url: jdbc:sqlserver://localhost:1433;databaseName=hotel_db;encrypt=true;trustServerCertificate=true;
-    # username: sa
-    # password: your_password
+    url: jdbc:sqlserver://localhost:1433;databaseName=hotel_db;encrypt=true;trustServerCertificate=true;
+    username: hotel_app
+    password: Password123!
     
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   
