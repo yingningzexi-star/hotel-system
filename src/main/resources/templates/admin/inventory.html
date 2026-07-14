@@ -275,7 +275,7 @@
                                 <div class="progress mt-1" style="height:4px; background:rgba(255,255,255,0.06);">
                                     <div class="progress-bar" role="progressbar"
                                          th:style="${roomType.totalQuantity > 0} ? 'width:' + (${inv.availableQuantity} * 100 / ${roomType.totalQuantity}) + '%' : 'width:0%'"
-                                         th:classappend="${inv.availableQuantity == 0} ? 'bg-danger' : (inv.availableQuantity <= roomType.totalQuantity / 3 ? 'bg-warning' : 'bg-success')"
+                                         th:classappend="${inv.availableQuantity == 0 ? 'bg-danger' : (inv.availableQuantity le roomType.totalQuantity / 3 ? 'bg-warning' : 'bg-success')}"
                                          style="border-radius:2px;"></div>
                                 </div>
                             </td>

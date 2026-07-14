@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -18,6 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new LoginInterceptor())
                 .addPathPatterns("/**") // 拦截所有路径
                 .excludePathPatterns(
+                        "/",              // 根路径（跳转房型页）
                         "/login",         // 登录页
                         "/register",      // 注册页
                         "/rooms",         // 房型浏览（未登录可看）
@@ -28,6 +30,14 @@ public class WebConfig implements WebMvcConfigurer {
                         "/error",         // 默认错误页
                         "/403"            // 403越权提示页
                 );
+    }
+
+    /**
+     * 配置根路径重定向到房型浏览页
+     */
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/", "/rooms");
     }
 
     /**

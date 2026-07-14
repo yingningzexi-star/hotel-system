@@ -1,7 +1,9 @@
 package com.hotel.system.repository;
 
 import com.hotel.system.entity.RoomInventory;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -45,4 +47,10 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
 
     /** 批量更新某房型某日的可用库存（扣减/恢复） */
     void deleteByRoomTypeId(Long roomTypeId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT ri FROM RoomInventory ri WHERE ri.roomTypeId = :roomTypeId AND ri.inventoryDate IN :dates")
+    List<RoomInventory> findByRoomTypeIdAndInventoryDateInForUpdate(
+            @Param("roomTypeId") Long roomTypeId,
+            @Param("dates") List<LocalDate> dates);
 }
