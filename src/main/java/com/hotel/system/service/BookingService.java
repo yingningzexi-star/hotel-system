@@ -67,28 +67,27 @@ public class BookingService {
             throw new IllegalArgumentException("该房型已下架");
         }
 
-        List<LocalDate> dates = checkIn.datesUntil(checkOut).toList();
-
-        List<RoomInventory> inventories = roomInventoryRepository
-                .findByRoomTypeIdAndInventoryDateInForUpdate(roomTypeId, dates);
-
-        if (inventories.size() != dates.size()) {
-            throw new IllegalArgumentException("所选日期范围内库存数据不完整，无法预订");
-        }
-
-        for (RoomInventory inv : inventories) {
+        // 逐日检查并扣减库存
+        LocalDate date = checkIn;
+        while (date.isBefore(checkOut)) {
+            final LocalDate currentDate = date;
+            RoomInventory inv = roomInventoryRepository
+                    .findByRoomTypeIdAndInventoryDate(roomTypeId, currentDate)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "日期 " + currentDate + " 无库存数据，无法预订"));
             if (inv.getAvailableQuantity() < quantity) {
                 throw new IllegalArgumentException(
-                        "日期 " + inv.getInventoryDate() + " 库存不足，当前剩余 " + inv.getAvailableQuantity() + " 间");
+                        "日期 " + currentDate + " 库存不足，当前剩余 " + inv.getAvailableQuantity() + " 间");
             }
             inv.setAvailableQuantity(inv.getAvailableQuantity() - quantity);
+            roomInventoryRepository.save(inv);
+            date = date.plusDays(1);
         }
-        roomInventoryRepository.saveAll(inventories);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
 
-        int nights = dates.size();
+        long nights = checkIn.datesUntil(checkOut).count();
         BigDecimal unitPrice = roomType.getPrice();
         BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(quantity * nights));
 
@@ -125,21 +124,23 @@ public class BookingService {
             throw new IllegalArgumentException("入住当天及之后不可取消订单，需提前至少一天");
         }
 
-        // 释放库存
-        List<LocalDate> dates = order.getCheckInDate().datesUntil(order.getCheckOutDate()).toList();
-        List<RoomInventory> inventories = roomInventoryRepository
-                .findByRoomTypeIdAndInventoryDateInForUpdate(order.getRoomType().getId(), dates);
-
-        for (RoomInventory inv : inventories) {
-            inv.setAvailableQuantity(inv.getAvailableQuantity() + order.getQuantity());
+        // 逐日释放库存
+        Long roomTypeId = order.getRoomType().getId();
+        LocalDate date = order.getCheckInDate();
+        while (date.isBefore(order.getCheckOutDate())) {
+            roomInventoryRepository.findByRoomTypeIdAndInventoryDate(roomTypeId, date)
+                    .ifPresent(inv -> {
+                        inv.setAvailableQuantity(inv.getAvailableQuantity() + order.getQuantity());
+                        roomInventoryRepository.save(inv);
+                    });
+            date = date.plusDays(1);
         }
-        roomInventoryRepository.saveAll(inventories);
 
         order.setStatus("CANCELLED");
         order.setCancelledAt(LocalDateTime.now());
         bookingOrderRepository.save(order);
 
-        // 累计取消次数（含信用惩罚逻辑）
+        // 累计取消次数，触发信用惩罚检查
         userService.incrementCancelCount(userId);
     }
 

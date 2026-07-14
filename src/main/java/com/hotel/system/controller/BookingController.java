@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,17 +28,20 @@ public class BookingController {
                                  @RequestParam LocalDate checkIn,
                                  @RequestParam LocalDate checkOut,
                                  @RequestParam(defaultValue = "1") int quantity,
-                                 HttpSession session, Model model) {
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes) {
         User currentUser = (User) session.getAttribute("currentUser");
         if (currentUser == null) {
             return "redirect:/login";
         }
 
         try {
-            bookingService.createBooking(currentUser.getId(), roomTypeId, checkIn, checkOut, quantity);
-            model.addAttribute("success", "预订成功！");
+            BookingOrder order = bookingService.createBooking(
+                    currentUser.getId(), roomTypeId, checkIn, checkOut, quantity);
+            redirectAttributes.addFlashAttribute("success",
+                    "预订成功！订单号：" + order.getOrderNo());
         } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
 
         return "redirect:/orders";
@@ -50,16 +54,21 @@ public class BookingController {
             return "redirect:/login";
         }
 
+        // 刷新信用状态
         userService.checkAndUpdateBannedStatus(currentUser);
 
         List<BookingOrder> orders = bookingService.getUserOrders(currentUser.getId());
         model.addAttribute("orders", orders);
         model.addAttribute("today", LocalDate.now());
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("activePage", "orders");
         return "orders";
     }
 
     @PostMapping("/orders/{id}/cancel")
-    public String cancelOrder(@PathVariable Long id, HttpSession session, Model model) {
+    public String cancelOrder(@PathVariable Long id,
+                               HttpSession session,
+                               RedirectAttributes redirectAttributes) {
         User currentUser = (User) session.getAttribute("currentUser");
         if (currentUser == null) {
             return "redirect:/login";
@@ -67,9 +76,12 @@ public class BookingController {
 
         try {
             bookingService.cancelBooking(id, currentUser.getId());
-            model.addAttribute("success", "订单已取消");
+            redirectAttributes.addFlashAttribute("success", "订单已取消。"
+                    + (currentUser.getCancelCount() >= 3
+                        ? "累计取消已达 3 次，7 天内禁止发起新预订！"
+                        : "当前累计取消 " + currentUser.getCancelCount() + " 次。"));
         } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
 
         return "redirect:/orders";

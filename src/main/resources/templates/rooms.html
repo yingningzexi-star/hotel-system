@@ -6,20 +6,31 @@
     <title>浏览房型 - Luxe Stay 酒店预订平台</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<<<<<<< Updated upstream
+=======
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+>>>>>>> Stashed changes
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
             --glass-bg: rgba(255, 255, 255, 0.03);
             --glass-border: rgba(255, 255, 255, 0.08);
+<<<<<<< Updated upstream
             --accent-color: linear-gradient(90deg, #6366f1, #a855f7);
             --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
+=======
+            --accent-gradient: linear-gradient(90deg, #6366f1, #a855f7, #d946ef);
+            --font-family: 'Outfit', -apple-system, sans-serif;
+        }
+>>>>>>> Stashed changes
         body {
             font-family: var(--font-family);
             background: var(--bg-gradient);
             color: #f8fafc;
             min-height: 100vh;
+<<<<<<< Updated upstream
             overflow-x: hidden;
             position: relative;
         }
@@ -42,17 +53,52 @@
         .navbar-brand {
             font-weight: 800;
             background: var(--accent-color);
+=======
+            position: relative;
+        }
+        .orb {
+            position: fixed; width: 550px; height: 550px; border-radius: 50%;
+            filter: blur(120px); z-index: -1; opacity: 0.2;
+        }
+        .orb-1 { background: #4f46e5; top: -15%; left: -10%; }
+        .orb-2 { background: #c084fc; bottom: -15%; right: -10%; }
+
+        .navbar-custom {
+            background: rgba(15,23,42,0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            background: var(--accent-gradient);
+>>>>>>> Stashed changes
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-size: 1.5rem;
         }
+<<<<<<< Updated upstream
 
         .glass-card {
+=======
+        .nav-link-custom {
+            color: #94a3b8 !important;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: #f8fafc !important;
+        }
+
+        .main-container { margin-top: 2rem; margin-bottom: 3rem; }
+
+        .hero-filter {
+>>>>>>> Stashed changes
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
             padding: 2rem;
+<<<<<<< Updated upstream
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
@@ -66,10 +112,66 @@
         }
 
         .room-card {
+=======
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        .hero-title {
+            font-weight: 800;
+            font-size: 2rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.3rem;
+        }
+        .hero-sub { color: #94a3b8; font-size: 1rem; margin-bottom: 1.5rem; }
+
+        .form-control-dark {
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.7rem 1rem;
+            color: #f8fafc;
+        }
+        .form-control-dark:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 12px rgba(168,85,247,0.2);
+            outline: none;
+            color: #f8fafc;
+        }
+        .form-label-light {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.4rem;
+        }
+        .btn-search {
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 0.7rem 2rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .btn-search:hover { transform: translateY(-2px); opacity: 0.9; color: white; }
+
+        .room-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+>>>>>>> Stashed changes
             height: 100%;
             display: flex;
             flex-direction: column;
         }
+<<<<<<< Updated upstream
 
         .room-card .price-tag {
             font-size: 2rem;
@@ -212,12 +314,121 @@
 </head>
 <body>
 
+=======
+        .room-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .room-img-container {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.2));
+        }
+        .room-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .room-card:hover .room-card-img { transform: scale(1.08); }
+        .room-img-placeholder i { font-size: 3rem; color: rgba(255,255,255,0.15); }
+        .room-body { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
+        .room-name { font-weight: 700; font-size: 1.3rem; margin-bottom: 0.3rem; }
+        .room-desc {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.6rem;
+        }
+        .room-price {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .room-price-label { color: #64748b; font-size: 0.8rem; }
+
+        .badge-available {
+            background: rgba(34,197,94,0.12);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: #86efac;
+            border-radius: 50px;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-unavailable {
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
+            border-radius: 50px;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .btn-book {
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 0.55rem 1.5rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s;
+            width: 100%;
+            cursor: pointer;
+        }
+        .btn-book:hover { transform: scale(1.02); opacity: 0.9; color: white; }
+        .btn-book-disabled {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            color: #64748b;
+            width: 100%;
+            border-radius: 12px;
+            padding: 0.55rem;
+            font-weight: 500;
+            cursor: not-allowed;
+        }
+        .btn-login-book {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--glass-border);
+            color: #94a3b8;
+            width: 100%;
+            border-radius: 12px;
+            padding: 0.55rem;
+            font-weight: 500;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .btn-login-book:hover { background: rgba(255,255,255,0.12); color: #cbd5e1; }
+
+        .empty-state { text-align: center; padding: 4rem 2rem; color: #64748b; }
+        .empty-state i { font-size: 3rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+>>>>>>> Stashed changes
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container">
             <a class="navbar-brand" href="/profile">Luxe Stay</a>
+<<<<<<< Updated upstream
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav align-items-center">
                     <li class="nav-item me-3">
@@ -231,12 +442,51 @@
                     </li>
                     <li class="nav-item">
                         <a class="btn btn-sm btn-custom-outline" href="/logout" style="border-color: rgba(239,68,68,0.4); color: #fca5a5;">退出登录</a>
+=======
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#userNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="userNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom active" href="/rooms">
+                            <i class="bi bi-building"></i> 浏览房型
+                        </a>
+                    </li>
+                    <li class="nav-item" th:if="${currentUser != null}">
+                        <a class="nav-link nav-link-custom" href="/orders">
+                            <i class="bi bi-journal-text"></i> 我的订单
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item d-flex align-items-center">
+                        <span th:if="${currentUser == null}">
+                            <a href="/login" class="btn btn-sm me-1"
+                               style="border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; border-radius:10px;">登录</a>
+                            <a href="/register" class="btn btn-sm"
+                               style="background:var(--accent-gradient); color:white; border-radius:10px;">注册</a>
+                        </span>
+                        <span th:if="${currentUser != null}">
+                            <a href="/profile" class="btn btn-sm me-1"
+                               style="border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; border-radius:10px;">
+                                <i class="bi bi-person"></i> <span th:text="${currentUser.realName}">用户</span>
+                            </a>
+                            <a href="/orders" class="btn btn-sm me-1"
+                               style="border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; border-radius:10px;">
+                                <i class="bi bi-journal-text"></i> 订单
+                            </a>
+                            <a href="/logout" class="btn btn-sm"
+                               style="border:1px solid rgba(239,68,68,0.3); color:#fca5a5; border-radius:10px;">退出</a>
+                        </span>
+>>>>>>> Stashed changes
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
+<<<<<<< Updated upstream
     <div class="container" style="margin-top: 2rem; margin-bottom: 3rem;">
         <!-- 搜索区域 -->
         <div class="glass-card search-card">
@@ -315,6 +565,116 @@
                              class="text-center py-2" style="color: #64748b; font-size: 0.85rem;">
                             请先选择入住日期搜索
                         </div>
+=======
+    <div class="container main-container">
+        <div class="hero-filter">
+            <div class="hero-title">查找可用房型</div>
+            <div class="hero-sub">选择入住和离店日期，查看可预订的房型与实时库存</div>
+
+            <form th:action="@{/rooms}" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label-light"><i class="bi bi-calendar-check me-1"></i>入住日期</label>
+                    <input type="date" class="form-control form-control-dark" name="checkIn"
+                           th:value="${checkInDate != null ? #temporals.format(checkInDate, 'yyyy-MM-dd') : ''}"
+                           required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label-light"><i class="bi bi-calendar-x me-1"></i>离店日期</label>
+                    <input type="date" class="form-control form-control-dark" name="checkOut"
+                           th:value="${checkOutDate != null ? #temporals.format(checkOutDate, 'yyyy-MM-dd') : ''}"
+                           required>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-search">
+                        <i class="bi bi-search me-1"></i> 查询可用房型
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 错误提示 -->
+        <div th:if="${error}" class="alert mb-3"
+             style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);
+                    color:#fca5a5; border-radius:12px;" th:text="${error}"></div>
+
+        <!-- 房型列表 -->
+        <div th:if="${availableRooms != null}">
+            <p style="color:#64748b; font-size:0.9rem;" class="mb-3">
+                <i class="bi bi-info-circle me-1"></i>
+                共找到 <strong style="color:#e2e8f0;" th:text="${#lists.size(availableRooms)}">0</strong> 个房型
+            </p>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4" th:each="item : ${availableRooms}">
+                    <div class="room-card" th:with="room=${item.roomType}">
+                        <div class="room-img-container">
+                            <img th:if="${room.imagePath != null && !#strings.isEmpty(room.imagePath)}"
+                                 th:src="${room.imagePath}" class="room-card-img" alt="房型图片">
+                            <div th:unless="${room.imagePath != null && !#strings.isEmpty(room.imagePath)}"
+                                 class="room-img-placeholder">
+                                <i class="bi bi-building"></i>
+                            </div>
+                        </div>
+                        <div class="room-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="room-name" th:text="${room.name}">标准双人间</div>
+                                <span th:if="${item.available}" class="badge-available">可预订</span>
+                                <span th:if="${!item.available}" class="badge-unavailable">已满</span>
+                            </div>
+                            <div class="room-desc mt-2" th:text="${room.description}">描述文本</div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <span class="room-price"
+                                          th:text="'¥' + ${#numbers.formatDecimal(room.price, 1, 'COMMA', 2, 'POINT')}">199.00</span>
+                                    <span class="room-price-label"> / 晚</span>
+                                </div>
+                                <div style="font-size:0.85rem;">
+                                    <span th:if="${item.available}" style="color:#4ade80;">
+                                        <i class="bi bi-box"></i> 余 <span th:text="${item.minAvailable}">10</span> 间
+                                    </span>
+                                    <span th:if="${!item.available}" style="color:#f87171;">已无余房</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-2" style="font-size:0.85rem; color:#64748b;">
+                                入住 <span th:text="${item.totalNights}">1</span> 晚，
+                                总计 <strong style="color:#e2e8f0;"
+                                    th:text="'¥' + ${#numbers.formatDecimal(item.totalPrice, 1, 'COMMA', 2, 'POINT')}">199.00</strong>
+                            </div>
+
+                            <!-- 预订按钮 -->
+                            <div class="mt-auto pt-3">
+                                <form th:if="${item.available && currentUser != null}"
+                                      th:action="@{/booking}" method="POST">
+                                    <input type="hidden" name="roomTypeId" th:value="${room.id}">
+                                    <input type="hidden" name="checkIn"
+                                           th:value="${#temporals.format(checkInDate, 'yyyy-MM-dd')}">
+                                    <input type="hidden" name="checkOut"
+                                           th:value="${#temporals.format(checkOutDate, 'yyyy-MM-dd')}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn-book">
+                                        <i class="bi bi-cart-plus"></i> 立即预订
+                                    </button>
+                                </form>
+                                <a th:if="${item.available && currentUser == null}"
+                                   href="/login" class="btn-login-book">
+                                    <i class="bi bi-box-arrow-in-right"></i> 登录后预订
+                                </a>
+                                <button th:if="${!item.available}"
+                                        class="btn-book-disabled" disabled>库存不足</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 无数据 -->
+                <div class="col-12" th:if="${#lists.isEmpty(availableRooms)}">
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <h5 style="color:#94a3b8;">暂无可用的房型</h5>
+                        <p>请调整入住/离店日期，或联系酒店了解详情。</p>
+>>>>>>> Stashed changes
                     </div>
                 </div>
             </div>
