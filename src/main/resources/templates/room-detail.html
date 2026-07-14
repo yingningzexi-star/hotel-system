@@ -243,13 +243,17 @@
                         <a th:href="@{/rooms}" class="btn btn-glass flex-fill text-center">
                             <i class="bi bi-arrow-left"></i> 继续浏览
                         </a>
-                        <!-- 预订按钮（后续 C 成员会修改这里的链接到真正的预订页面） -->
-                        <a th:if="${currentUser != null}"
-                           href="#"
-                           class="btn btn-book flex-fill text-center"
-                           onclick="alert('预订功能由 C 成员开发中，敬请期待！');">
-                            <i class="bi bi-cart-check"></i> 立即预订
-                        </a>
+                        <form th:if="${currentUser != null && detail.roomType.status == 1}"
+                              th:action="@{/booking}" method="POST"
+                              class="flex-fill">
+                            <input type="hidden" name="roomTypeId" th:value="${detail.roomType.id}">
+                            <input type="hidden" name="checkIn" th:value="${#temporals.format(checkInDate, 'yyyy-MM-dd')}">
+                            <input type="hidden" name="checkOut" th:value="${#temporals.format(checkOutDate, 'yyyy-MM-dd')}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-book w-100">
+                                <i class="bi bi-cart-check"></i> 立即预订
+                            </button>
+                        </form>
                         <a th:if="${currentUser == null}"
                            th:href="@{/login}"
                            class="btn btn-book flex-fill text-center">
