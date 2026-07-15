@@ -3,6 +3,7 @@ package com.hotel.system.controller;
 import com.hotel.system.entity.RoomInventory;
 import com.hotel.system.entity.RoomType;
 import com.hotel.system.entity.User;
+import com.hotel.system.service.ReviewService;
 import com.hotel.system.service.RoomService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 管理员后台 — 房型与库存管理控制器
@@ -29,6 +32,9 @@ public class AdminRoomController {
     @Autowired
     private RoomService roomService;
 
+    @Autowired
+    private ReviewService reviewService;
+
     // ==================== 房型管理 ====================
 
     /**
@@ -37,7 +43,8 @@ public class AdminRoomController {
      */
     @GetMapping("")
     public String listRooms(Model model, HttpSession session,
-                            @RequestParam(value = "keyword", required = false) String keyword) {
+                            @RequestParam(value = "keyword", required = false) String keyword,
+                            @RequestParam(defaultValue = "1") int page) {
         User currentUser = (User) session.getAttribute("currentUser");
         model.addAttribute("currentUser", currentUser);
 
@@ -48,7 +55,29 @@ public class AdminRoomController {
         } else {
             roomTypes = roomService.getAllRoomTypes();
         }
-        model.addAttribute("roomTypes", roomTypes);
+
+        Map<Long, Double> avgRatings = new HashMap<>();
+        Map<Long, Long> reviewCounts = new HashMap<>();
+        for (RoomType rt : roomTypes) {
+            Double avg = reviewService.getRoomAverageRating(rt.getId());
+            avgRatings.put(rt.getId(), avg != null ? avg : 0.0);
+            reviewCounts.put(rt.getId(), reviewService.getRoomReviewCount(rt.getId()));
+        }
+
+        int size = 10;
+        int total = roomTypes.size();
+        int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        int fromIndex = Math.min((page - 1) * size, total);
+        int toIndex = Math.min(fromIndex + size, total);
+
+        model.addAttribute("roomTypes", roomTypes.subList(fromIndex, toIndex));
+        model.addAttribute("avgRatings", avgRatings);
+        model.addAttribute("reviewCounts", reviewCounts);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalItems", total);
         model.addAttribute("activePage", "rooms");
 
         return "admin/room-list";
@@ -76,12 +105,8 @@ public class AdminRoomController {
     @PostMapping("/create")
     public String createRoom(@ModelAttribute RoomType roomType,
                              RedirectAttributes redirectAttributes) {
-        try {
-            roomService.createRoomType(roomType);
-            redirectAttributes.addFlashAttribute("success", "房型「" + roomType.getName() + "」创建成功！");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "创建失败：" + e.getMessage());
-        }
+        roomService.createRoomType(roomType);
+        redirectAttributes.addFlashAttribute("success", "房型「" + roomType.getName() + "」创建成功！");
         return "redirect:/admin/room";
     }
 
@@ -114,12 +139,8 @@ public class AdminRoomController {
     @PostMapping("/edit")
     public String updateRoom(@ModelAttribute RoomType roomType,
                              RedirectAttributes redirectAttributes) {
-        try {
-            roomService.updateRoomType(roomType);
-            redirectAttributes.addFlashAttribute("success", "房型「" + roomType.getName() + "」更新成功！");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "更新失败：" + e.getMessage());
-        }
+        roomService.updateRoomType(roomType);
+        redirectAttributes.addFlashAttribute("success", "房型「" + roomType.getName() + "」更新成功！");
         return "redirect:/admin/room";
     }
 
@@ -130,15 +151,11 @@ public class AdminRoomController {
     @PostMapping("/toggle/{id}")
     public String toggleRoomStatus(@PathVariable Long id,
                                    RedirectAttributes redirectAttributes) {
-        try {
-            RoomType roomType = roomService.getRoomTypeById(id);
-            roomService.toggleRoomStatus(id);
-            String statusText = roomType.getStatus() == 1 ? "已禁用" : "已启用";
-            redirectAttributes.addFlashAttribute("success",
-                    "房型「" + roomType.getName() + "」" + statusText);
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "操作失败：" + e.getMessage());
-        }
+        RoomType roomType = roomService.getRoomTypeById(id);
+        roomService.toggleRoomStatus(id);
+        String statusText = roomType.getStatus() == 1 ? "已禁用" : "已启用";
+        redirectAttributes.addFlashAttribute("success",
+                "房型「" + roomType.getName() + "」" + statusText);
         return "redirect:/admin/room";
     }
 
@@ -180,12 +197,8 @@ public class AdminRoomController {
                                   @RequestParam Integer availableQuantity,
                                   @RequestParam Long roomTypeId,
                                   RedirectAttributes redirectAttributes) {
-        try {
-            roomService.updateDailyInventory(inventoryId, availableQuantity);
-            redirectAttributes.addFlashAttribute("success", "库存数量已更新");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "更新失败：" + e.getMessage());
-        }
+        roomService.updateDailyInventory(inventoryId, availableQuantity);
+        redirectAttributes.addFlashAttribute("success", "库存数量已更新");
         return "redirect:/admin/room/inventory/" + roomTypeId;
     }
 
@@ -197,14 +210,10 @@ public class AdminRoomController {
     public String generateInventory(@RequestParam Long roomTypeId,
                                     @RequestParam(defaultValue = "30") int days,
                                     RedirectAttributes redirectAttributes) {
-        try {
-            RoomType roomType = roomService.getRoomTypeById(roomTypeId);
-            roomService.generateInventoryForDays(roomTypeId, roomType.getTotalQuantity(),
-                    LocalDate.now(), days);
-            redirectAttributes.addFlashAttribute("success", "已补充未来 " + days + " 天的库存记录");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "补充失败：" + e.getMessage());
-        }
+        RoomType roomType = roomService.getRoomTypeById(roomTypeId);
+        roomService.generateInventoryForDays(roomTypeId, roomType.getTotalQuantity(),
+                LocalDate.now(), days);
+        redirectAttributes.addFlashAttribute("success", "已补充未来 " + days + " 天的库存记录");
         return "redirect:/admin/room/inventory/" + roomTypeId;
     }
 }

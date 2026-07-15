@@ -116,7 +116,7 @@ public class BookingService {
             throw new IllegalArgumentException("无权取消该订单");
         }
 
-        if (!"BOOKED".equals(order.getStatus())) {
+        if (!("BOOKED".equals(order.getStatus()) || "PAID".equals(order.getStatus()))) {
             throw new IllegalArgumentException("该订单当前状态不可取消");
         }
 
@@ -143,8 +143,110 @@ public class BookingService {
         userService.incrementCancelCount(userId);
     }
 
+    @Transactional
+    public BookingOrder payOrder(Long orderId, Long userId) {
+        BookingOrder order = bookingOrderRepository.findByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("订单不存在或无权操作"));
+
+        if (!"BOOKED".equals(order.getStatus())) {
+            throw new IllegalArgumentException("该订单当前状态不可支付");
+        }
+
+        order.setStatus("PAID");
+        order.setPaidAt(LocalDateTime.now());
+        return bookingOrderRepository.save(order);
+    }
+
+    @Transactional
+    public BookingOrder adminCheckin(Long orderId) {
+        BookingOrder order = bookingOrderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("订单不存在"));
+
+        if (!"PAID".equals(order.getStatus())) {
+            throw new IllegalArgumentException("只有已支付的订单才能办理入住");
+        }
+
+        order.setStatus("CHECKED_IN");
+        return bookingOrderRepository.save(order);
+    }
+
+    @Transactional
+    public BookingOrder adminCheckout(Long orderId) {
+        BookingOrder order = bookingOrderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("订单不存在"));
+
+        if (!"CHECKED_IN".equals(order.getStatus())) {
+            throw new IllegalArgumentException("只有已入住的订单才能办理退房");
+        }
+
+        order.setStatus("COMPLETED");
+        return bookingOrderRepository.save(order);
+    }
+
+    @Transactional
+    public BookingOrder userCheckin(Long orderId, Long userId) {
+        BookingOrder order = bookingOrderRepository.findByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("订单不存在或无权操作"));
+
+        if (!"PAID".equals(order.getStatus())) {
+            throw new IllegalArgumentException("只有已支付的订单才能办理入住");
+        }
+
+        if (order.getCheckInDate().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("未到入住日期，无法办理入住");
+        }
+
+        order.setStatus("CHECKED_IN");
+        return bookingOrderRepository.save(order);
+    }
+
+    @Transactional
+    public BookingOrder userCheckout(Long orderId, Long userId) {
+        BookingOrder order = bookingOrderRepository.findByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("订单不存在或无权操作"));
+
+        if (!"CHECKED_IN".equals(order.getStatus())) {
+            throw new IllegalArgumentException("只有已入住的订单才能办理退房");
+        }
+
+        order.setStatus("COMPLETED");
+        return bookingOrderRepository.save(order);
+    }
+
+    @Transactional
+    public void adminCancelOrder(Long orderId) {
+        BookingOrder order = bookingOrderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("订单不存在"));
+
+        if (!("BOOKED".equals(order.getStatus()) || "PAID".equals(order.getStatus()))) {
+            throw new IllegalArgumentException("该订单当前状态不可取消");
+        }
+
+        List<LocalDate> dates = order.getCheckInDate().datesUntil(order.getCheckOutDate()).toList();
+        List<RoomInventory> inventories = roomInventoryRepository
+                .findByRoomTypeIdAndInventoryDateInForUpdate(order.getRoomType().getId(), dates);
+
+        for (RoomInventory inv : inventories) {
+            inv.setAvailableQuantity(inv.getAvailableQuantity() + order.getQuantity());
+        }
+        roomInventoryRepository.saveAll(inventories);
+
+        order.setStatus("CANCELLED");
+        order.setCancelledAt(LocalDateTime.now());
+        bookingOrderRepository.save(order);
+    }
+
+    public List<BookingOrder> getAllOrders(String status, LocalDateTime startDate, LocalDateTime endDate, String username) {
+        return bookingOrderRepository.findWithFilters(status, startDate, endDate, username);
+    }
+
     public List<BookingOrder> getUserOrders(Long userId) {
         return bookingOrderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    public BookingOrder getOrderById(Long orderId) {
+        return bookingOrderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("订单不存在"));
     }
 
     private String generateOrderNo() {

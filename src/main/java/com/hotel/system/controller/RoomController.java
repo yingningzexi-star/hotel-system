@@ -1,6 +1,8 @@
 package com.hotel.system.controller;
 
+import com.hotel.system.entity.Review;
 import com.hotel.system.entity.User;
+import com.hotel.system.service.ReviewService;
 import com.hotel.system.service.RoomService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +15,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 用户端 — 房型浏览与搜索控制器
- * B成员负责：用户可预订房型的展示、按日期查询可用房间
- *
- * 关联：C 成员的预订模块将通过此页面的房型信息发起预订
- */
 @Controller
 @RequestMapping("/rooms")
 public class RoomController {
@@ -26,25 +22,23 @@ public class RoomController {
     @Autowired
     private RoomService roomService;
 
-    /**
-     * 房型浏览页（用户端首页）
-     * GET /rooms
-     *
-     * 支持按入住/离店日期筛选可用房型
-     */
+    @Autowired
+    private ReviewService reviewService;
+
     @GetMapping("")
     public String listRooms(@RequestParam(value = "checkIn", required = false) String checkInStr,
                             @RequestParam(value = "checkOut", required = false) String checkOutStr,
+                            @RequestParam(value = "keyword", required = false) String keyword,
+                            @RequestParam(value = "page", defaultValue = "0") int page,
+                            @RequestParam(value = "size", defaultValue = "9") int size,
                             Model model, HttpSession session) {
 
-        // 当前登录用户（可为 null，未登录也能浏览）
         User currentUser = (User) session.getAttribute("currentUser");
         model.addAttribute("currentUser", currentUser);
 
-        // 解析日期参数
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate checkInDate = null;
         LocalDate checkOutDate = null;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         try {
             if (checkInStr != null && !checkInStr.isEmpty()) {
@@ -54,21 +48,51 @@ public class RoomController {
                 checkOutDate = LocalDate.parse(checkOutStr, formatter);
             }
 
-            // 执行查询
             List<Map<String, Object>> availableRooms = roomService.getAvailableRooms(checkInDate, checkOutDate);
-            model.addAttribute("availableRooms", availableRooms);
 
-            // 回填日期到页面
+            // add rating info to each room
+            for (Map<String, Object> item : availableRooms) {
+                var room = (com.hotel.system.entity.RoomType) item.get("roomType");
+                Double avgRating = reviewService.getRoomAverageRating(room.getId());
+                long reviewCount = reviewService.getRoomReviewCount(room.getId());
+                item.put("avgRating", avgRating != null ? avgRating : 0.0);
+                item.put("reviewCount", reviewCount);
+            }
+
+            // keyword filter
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                availableRooms = availableRooms.stream()
+                        .filter(item -> {
+                            var room = (com.hotel.system.entity.RoomType) item.get("roomType");
+                            return room.getName().toLowerCase().contains(keyword.trim().toLowerCase());
+                        })
+                        .toList();
+            }
+
+            // pagination
+            int total = availableRooms.size();
+            int totalPages = total > 0 ? (int) Math.ceil((double) total / size) : 0;
+            if (page < 0) page = 0;
+            if (totalPages > 0 && page >= totalPages) page = totalPages - 1;
+            int from = Math.min(page * size, total);
+            int to = Math.min(from + size, total);
+            List<Map<String, Object>> pagedRooms = availableRooms.subList(from, to);
+
+            model.addAttribute("availableRooms", pagedRooms);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalItems", total);
+            model.addAttribute("keyword", keyword);
             model.addAttribute("checkInDate", checkInDate != null ? checkInDate : LocalDate.now().plusDays(1));
             model.addAttribute("checkOutDate", checkOutDate != null ? checkOutDate : LocalDate.now().plusDays(2));
 
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            // 默认显示未来数据
             model.addAttribute("checkInDate", LocalDate.now().plusDays(1));
             model.addAttribute("checkOutDate", LocalDate.now().plusDays(2));
-
-            // 无筛选查询
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalItems", 0);
             try {
                 List<Map<String, Object>> availableRooms = roomService.getAvailableRooms(null, null);
                 model.addAttribute("availableRooms", availableRooms);
@@ -81,10 +105,6 @@ public class RoomController {
         return "rooms";
     }
 
-    /**
-     * 房型详情页
-     * GET /rooms/{id}
-     */
     @GetMapping("/{id}")
     public String roomDetail(@PathVariable Long id,
                              @RequestParam(value = "checkIn", required = false) String checkInStr,
@@ -108,9 +128,16 @@ public class RoomController {
 
             Map<String, Object> detail = roomService.getRoomDetailWithAvailability(id, checkInDate, checkOutDate);
             model.addAttribute("detail", detail);
-
             model.addAttribute("checkInDate", checkInDate);
             model.addAttribute("checkOutDate", checkOutDate);
+
+            // review data
+            Double avgRating = reviewService.getRoomAverageRating(id);
+            long reviewCount = reviewService.getRoomReviewCount(id);
+            List<Review> reviews = reviewService.getRoomReviews(id);
+            model.addAttribute("avgRating", avgRating != null ? avgRating : 0.0);
+            model.addAttribute("reviewCount", reviewCount);
+            model.addAttribute("reviews", reviews);
 
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());

@@ -17,4 +17,12 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
 
     /** 按名称模糊搜索房型（管理员用） */
     List<RoomType> findByNameContaining(String name);
+
+    /** 按名称模糊搜索启用中的房型（用户端用） */
+    List<RoomType> findByNameContainingAndStatus(String name, Integer status);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(rt.totalQuantity), 0) FROM RoomType rt WHERE rt.status = 1")
+    long sumTotalQuantityByStatusActive();
+
+    long countByStatus(Integer status);
 }

@@ -1,18 +1,26 @@
 package com.hotel.system.controller;
 
+import com.hotel.system.entity.Review;
 import com.hotel.system.entity.User;
+import com.hotel.system.service.ReviewService;
 import com.hotel.system.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ReviewService reviewService;
 
     @GetMapping("/login")
     public String loginPage(HttpSession session) {
@@ -79,8 +87,38 @@ public class AuthController {
         // 实时刷新信用禁订状态
         userService.checkAndUpdateBannedStatus(currentUser);
 
+        // 加载用户评价
+        List<Review> reviews = reviewService.getUserReviews(currentUser.getId());
+        model.addAttribute("reviews", reviews);
         model.addAttribute("user", currentUser);
+        model.addAttribute("currentUser", currentUser);
         return "profile";
+    }
+
+    @PostMapping("/profile/edit")
+    public String editProfile(@RequestParam(required = false) String phone,
+                              @RequestParam(required = false) String currentPassword,
+                              @RequestParam(required = false) String newPassword,
+                              @RequestParam(required = false) String confirmPassword,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        User currentUser = (User) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        if (newPassword != null && !newPassword.trim().isEmpty()) {
+            if (!newPassword.equals(confirmPassword)) {
+                redirectAttributes.addFlashAttribute("error", "两次输入的新密码不一致");
+                return "redirect:/profile";
+            }
+        }
+
+        userService.updateProfile(currentUser.getId(), phone, currentPassword, newPassword);
+        User refreshed = userService.findById(currentUser.getId());
+        session.setAttribute("currentUser", refreshed);
+        redirectAttributes.addFlashAttribute("success", "个人资料更新成功");
+        return "redirect:/profile";
     }
 
     @GetMapping("/403")

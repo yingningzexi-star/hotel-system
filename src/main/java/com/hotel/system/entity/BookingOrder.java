@@ -53,4 +53,7 @@ public class BookingOrder {
 
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
 }

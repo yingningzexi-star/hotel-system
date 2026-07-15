@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -97,5 +98,72 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
         return checkAndUpdateBannedStatus(user);
+    }
+
+    /**
+     * 根据ID查找用户（用于刷新 session 中的用户数据）
+     */
+    public User findById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+    }
+
+    /**
+     * 更新用户个人资料（手机号和密码）
+     */
+    @Transactional
+    public void updateProfile(Long userId, String phone, String currentPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+
+        if (phone != null && !phone.trim().isEmpty()) {
+            user.setPhone(phone.trim());
+        }
+
+        if (newPassword != null && !newPassword.trim().isEmpty()) {
+            if (currentPassword == null || !passwordEncoder.matches(currentPassword, user.getPassword())) {
+                throw new IllegalArgumentException("当前密码错误");
+            }
+            if (newPassword.length() < 6) {
+                throw new IllegalArgumentException("新密码长度不能少于6位");
+            }
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
+
+        userRepository.save(user);
+    }
+
+    /**
+     * 管理员手动封禁用户
+     */
+    @Transactional
+    public void banUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        user.setBannedUntil(LocalDateTime.now().plusDays(7));
+        user.setCancelCount(3);
+        userRepository.save(user);
+    }
+
+    /**
+     * 管理员手动解封用户
+     */
+    @Transactional
+    public void unbanUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        user.setBannedUntil(null);
+        user.setCancelCount(0);
+        userRepository.save(user);
+    }
+
+    /**
+     * 获取所有用户列表（支持关键词搜索）
+     */
+    public List<User> getAllUsers(String keyword) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            return userRepository.findByUsernameContainingOrRealNameContaining(keyword, keyword);
+        }
+        return userRepository.findAll();
     }
 }

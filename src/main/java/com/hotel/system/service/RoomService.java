@@ -121,6 +121,16 @@ public class RoomService {
         return roomTypeRepository.findByNameContaining(keyword);
     }
 
+    /**
+     * 按名称搜索启用中的房型（用户端用）
+     */
+    public List<RoomType> searchActiveRoomTypes(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getActiveRoomTypes();
+        }
+        return roomTypeRepository.findByNameContainingAndStatus(keyword, 1);
+    }
+
     // ==================== 每日库存管理 ====================
 
     /**

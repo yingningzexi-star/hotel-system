@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仪表盘 - Luxe Stay 管理后台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-gradient: linear-gradient(90deg, #6366f1, #a855f7);
+            --font-family: 'Outfit', -apple-system, sans-serif;
+        }
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-gradient);
+            color: #f8fafc;
+            min-height: 100vh;
+            position: relative;
+            color-scheme: dark;
+        }
+        input, select, textarea { color-scheme: dark; }
+        .table { --bs-table-bg: transparent; --bs-table-color: #e2e8f0; --bs-table-border-color: rgba(255,255,255,0.04); }
+        .table thead th { background: rgba(15,23,42,0.95) !important; }
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #1e293b inset !important;
+            -webkit-text-fill-color: #f8fafc !important;
+        }
+        .orb {
+            position: fixed; width: 500px; height: 500px; border-radius: 50%;
+            filter: blur(100px); z-index: -1; opacity: 0.25;
+        }
+        .orb-1 { background: #4f46e5; top: -10%; left: -10%; }
+        .orb-2 { background: #c084fc; bottom: -10%; right: -10%; }
+
+        .navbar-custom {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+        .nav-link-custom {
+            color: #94a3b8 !important;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-radius: 10px;
+            padding: 0.5rem 1rem !important;
+        }
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: #f8fafc !important;
+            background: rgba(255,255,255,0.05);
+        }
+        .nav-link-custom i { margin-right: 6px; }
+
+        .main-container { margin-top: 2rem; margin-bottom: 3rem; }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .page-title {
+            font-weight: 800;
+            font-size: 1.8rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        .stat-card:hover { border-color: rgba(255,255,255,0.15); }
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #e2e8f0;
+        }
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .table-custom {
+            color: #e2e8f0;
+            margin-bottom: 0;
+        }
+        .table-custom thead th {
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.8rem 0.75rem;
+        }
+        .table-custom tbody td {
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            padding: 0.7rem 0.75rem;
+            vertical-align: middle;
+        }
+
+        .badge-status {
+            padding: 0.3rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-booked { background: rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; }
+        .badge-paid { background: rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); color:#67e8f9; }
+        .badge-checkin { background: rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); color:#86efac; }
+        .badge-completed { background: rgba(168,85,247,0.15); border:1px solid rgba(168,85,247,0.3); color:#c4b5fd; }
+        .badge-cancelled { background: rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; }
+
+        .btn-glass {
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: #cbd5e1;
+            background: rgba(255,255,255,0.03);
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-glass:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color:#f8fafc; }
+        .btn-glass-danger { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+        .btn-glass-danger:hover { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/admin/dashboard">Luxe Stay · 管理后台</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="adminNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="/rooms" target="_blank">
+                            <i class="bi bi-house"></i>浏览房型
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom active" href="/admin/dashboard">
+                            <i class="bi bi-speedometer2"></i>仪表盘
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="/admin/room">
+                            <i class="bi bi-building"></i>房型管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="/admin/orders">
+                            <i class="bi bi-receipt"></i>订单管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="/admin/reviews">
+                            <i class="bi bi-star"></i>评价管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="/admin/users">
+                            <i class="bi bi-people"></i>用户管理
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item d-flex align-items-center">
+                        <span class="text-light me-3" style="font-size:0.9rem;">
+                            <i class="bi bi-shield-check me-1"></i>
+                            <span th:text="${currentUser.realName}">管理员</span>
+                        </span>
+                        <a class="btn btn-sm btn-glass" href="/profile">
+                            <i class="bi bi-person"></i> 个人中心
+                        </a>
+                        <a class="btn btn-sm btn-glass-danger ms-2" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> 退出
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        <!-- 统计卡片 -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#60a5fa;"><i class="bi bi-door-open"></i></div>
+                    <div class="stat-value" th:text="${todayCheckins}">0</div>
+                    <div class="stat-label">今日入住</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#f59e0b;"><i class="bi bi-door-closed"></i></div>
+                    <div class="stat-value" th:text="${todayCheckouts}">0</div>
+                    <div class="stat-label">今日退房</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#a855f7;"><i class="bi bi-cash-stack"></i></div>
+                    <div class="stat-value">
+                        ¥<span th:text="${#numbers.formatDecimal(monthRevenue, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </div>
+                    <div class="stat-label">本月营收</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#4ade80;"><i class="bi bi-pie-chart"></i></div>
+                    <div class="stat-value" th:text="${occupancyPct} + '%'">0%</div>
+                    <div class="stat-label">今日入住率</div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#fbbf24;"><i class="bi bi-currency-yen"></i></div>
+                    <div class="stat-value">
+                        ¥<span th:text="${#numbers.formatDecimal(todayRevenue, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </div>
+                    <div class="stat-label">今日营收</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#38bdf8;"><i class="bi bi-receipt"></i></div>
+                    <div class="stat-value" th:text="${totalOrders}">0</div>
+                    <div class="stat-label">总订单数</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#fb923c;"><i class="bi bi-people"></i></div>
+                    <div class="stat-value" th:text="${totalUsers}">0</div>
+                    <div class="stat-label">总用户数</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#c084fc;"><i class="bi bi-building"></i></div>
+                    <div class="stat-value" th:text="${activeRoomTypes}">0</div>
+                    <div class="stat-label">活跃房型</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最近订单 -->
+        <div class="glass-card">
+            <h5 class="fw-bold mb-3" style="color: #e2e8f0;">最近订单</h5>
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>订单号</th>
+                            <th>用户</th>
+                            <th>房型</th>
+                            <th>入住-离店</th>
+                            <th>金额</th>
+                            <th>状态</th>
+                            <th>时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${recentOrders}">
+                            <td style="font-family:monospace; font-size:0.78rem; color:#64748b;" th:text="${order.orderNo}">ORD...</td>
+                            <td th:text="${order.user.realName}">张三</td>
+                            <td th:text="${order.roomType.name}">标准间</td>
+                            <td style="font-size:0.85rem;">
+                                <span th:text="${order.checkInDate}">07-15</span>
+                                <span style="color:#64748b;"> ~ </span>
+                                <span th:text="${order.checkOutDate}">07-17</span>
+                            </td>
+                            <td style="color:#a855f7; font-weight:600;" th:text="'¥' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">398.00</td>
+                            <td>
+                                <span th:if="${order.status == 'BOOKED'}" class="badge-status badge-booked">已预订</span>
+                                <span th:if="${order.status == 'PAID'}" class="badge-status badge-paid">已支付</span>
+                                <span th:if="${order.status == 'CHECKED_IN'}" class="badge-status badge-checkin">已入住</span>
+                                <span th:if="${order.status == 'COMPLETED'}" class="badge-status badge-completed">已完成</span>
+                                <span th:if="${order.status == 'CANCELLED'}" class="badge-status badge-cancelled">已取消</span>
+                            </td>
+                            <td style="font-size:0.8rem; color:#64748b;" th:text="${#temporals.format(order.createdAt, 'MM-dd HH:mm')}">07-15 14:30</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(recentOrders)}">
+                            <td colspan="7" class="text-center py-4" style="color:#64748b;">暂无订单</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

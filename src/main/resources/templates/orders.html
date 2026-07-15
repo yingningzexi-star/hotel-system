@@ -174,10 +174,22 @@
             color: #fca5a5;
         }
 
-        .badge-completed {
+        .badge-paid {
+            background: rgba(6, 182, 212, 0.15);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: #67e8f9;
+        }
+
+        .badge-checkin {
             background: rgba(34, 197, 94, 0.15);
             border: 1px solid rgba(34, 197, 94, 0.3);
             color: #86efac;
+        }
+
+        .badge-completed {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            color: #c4b5fd;
         }
 
         .order-info-label {
@@ -228,6 +240,11 @@
                     </li>
                     <li class="nav-item me-3">
                         <a class="nav-link nav-link-custom" href="/profile">个人中心</a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:if="${currentUser.role == 'ADMIN'}" th:href="@{/admin/dashboard}" class="btn btn-sm btn-custom-outline me-2" style="border-color:rgba(168,85,247,0.4); color:#c4b5fd;">
+                            <i class="bi bi-speedometer2"></i> 后台
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="btn btn-sm btn-custom-outline" href="/logout" style="border-color: rgba(239,68,68,0.4); color: #fca5a5;">退出登录</a>
@@ -318,19 +335,70 @@
                         </div>
                         <div class="col-lg-1 text-center">
                             <span th:if="${order.status == 'BOOKED'}" class="badge-status badge-booked">已预订</span>
-                            <span th:if="${order.status == 'CANCELLED'}" class="badge-status badge-cancelled">已取消</span>
+                            <span th:if="${order.status == 'PAID'}" class="badge-status badge-paid">已支付</span>
+                            <span th:if="${order.status == 'CHECKED_IN'}" class="badge-status badge-checkin">已入住</span>
                             <span th:if="${order.status == 'COMPLETED'}" class="badge-status badge-completed">已完成</span>
+                            <span th:if="${order.status == 'CANCELLED'}" class="badge-status badge-cancelled">已取消</span>
                         </div>
                         <div class="col-lg-2 text-end">
-                            <form th:if="${order.status == 'BOOKED' && today.isBefore(order.checkInDate)}"
-                                  th:action="@{/orders/{id}/cancel(id=${order.id})}" method="POST"
-                                  onsubmit="return confirm('确定取消该订单吗？\n\n取消后会计入取消次数（累计3次将被禁订7天）。')">
-                                <button type="submit" class="btn-custom-outline btn-cancel w-100">取消订单</button>
-                            </form>
-                            <span th:if="${order.status == 'BOOKED' && !today.isBefore(order.checkInDate)}"
-                                  style="font-size: 0.8rem; color: #64748b;">
-                                已过取消时限
-                            </span>
+                            <!-- BOOKED: 支付 + 取消 -->
+                            <div th:if="${order.status == 'BOOKED'}" class="d-flex flex-column gap-1">
+                                <button type="button" class="btn-book-room w-100" style="font-size:0.8rem; padding:0.35rem 0.5rem;"
+                                        data-bs-toggle="modal" data-bs-target="#payModal"
+                                        th:attr="data-order-id=${order.id}, data-order-no=${order.orderNo}, data-room-name=${order.roomType.name}, data-check-in=${order.checkInDate}, data-check-out=${order.checkOutDate}, data-quantity=${order.quantity}, data-amount=${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}"
+                                        onclick="setPayModal(this)">
+                                    <i class="bi bi-credit-card"></i> 去支付
+                                </button>
+                                <form th:if="${today.isBefore(order.checkInDate)}"
+                                      th:action="@{/orders/{id}/cancel(id=${order.id})}" method="POST"
+                                      onsubmit="return confirm('确定取消该订单吗？\n\n取消后会计入取消次数（累计3次将被禁订7天）。')">
+                                    <button type="submit" class="btn-custom-outline btn-cancel w-100" style="font-size:0.8rem; padding:0.35rem 0.5rem;">取消</button>
+                                </form>
+                                <span th:if="${!today.isBefore(order.checkInDate)}"
+                                      style="font-size:0.75rem; color:#64748b;">已过取消时限</span>
+                            </div>
+
+                            <!-- PAID: 取消（入住前）or 入住按钮（入住日当天起） -->
+                            <div th:if="${order.status == 'PAID' && today.isBefore(order.checkInDate)}" class="d-flex flex-column gap-1">
+                                <span style="font-size:0.72rem; color:#64748b;">
+                                    <i class="bi bi-clock"></i> 等待入住日
+                                </span>
+                                <form th:action="@{/orders/{id}/cancel(id=${order.id})}" method="POST"
+                                      onsubmit="return confirm('确定取消该订单吗？\n\n取消后会计入取消次数（累计3次将被禁订7天）。\n已支付的金额将原路返回。')">
+                                    <button type="submit" class="btn-custom-outline btn-cancel w-100">取消订单</button>
+                                </form>
+                            </div>
+                            <div th:if="${order.status == 'PAID' && !today.isBefore(order.checkInDate)}" class="d-flex flex-column gap-1">
+                                <form th:action="@{/orders/{id}/checkin(id=${order.id})}" method="POST"
+                                      onsubmit="return confirm('确认办理入住吗？')">
+                                    <button type="submit" class="btn-book-room w-100" style="font-size:0.8rem; padding:0.35rem 0.5rem;">
+                                        <i class="bi bi-door-open"></i> 办理入住
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- CHECKED_IN: 退房 -->
+                            <div th:if="${order.status == 'CHECKED_IN'}" class="d-flex flex-column gap-1">
+                                <form th:action="@{/orders/{id}/checkout(id=${order.id})}" method="POST"
+                                      onsubmit="return confirm('确定办理退房吗？')">
+                                    <button type="submit" class="btn-book-room w-100" style="font-size:0.8rem; padding:0.35rem 0.5rem;">
+                                        <i class="bi bi-door-closed"></i> 办理退房
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- COMPLETED: 写评价 -->
+                            <div th:if="${order.status == 'COMPLETED'}">
+                                <a th:if="${!reviewedOrderIds.contains(order.id)}"
+                                   th:href="@{/reviews/write/{orderId}(orderId=${order.id})}"
+                                   class="btn-book-room" style="font-size:0.8rem; padding:0.35rem 0.5rem;">
+                                    <i class="bi bi-pencil"></i> 写评价
+                                </a>
+                                <span th:if="${reviewedOrderIds.contains(order.id)}"
+                                      style="color:#64748b; font-size:0.75rem;">已评价</span>
+                            </div>
+
+                            <!-- CANCELLED: 取消时间 -->
                             <span th:if="${order.status == 'CANCELLED'}"
                                   style="color: #64748b; font-size: 0.75rem;">
                                 取消于<br><span th:text="${#temporals.format(order.cancelledAt, 'MM-dd HH:mm')}">07-13 14:30</span>
@@ -342,6 +410,64 @@
         </div>
     </div>
 
+    <!-- 支付确认弹窗 -->
+    <div class="modal fade" id="payModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background:rgba(15,23,42,0.95); backdrop-filter:blur(30px); border:1px solid var(--glass-border); border-radius:20px; color:#f8fafc;">
+                <div class="modal-header" style="border-bottom:1px solid var(--glass-border);">
+                    <h5 class="modal-title fw-bold" style="color:#e2e8f0;">
+                        <i class="bi bi-credit-card me-2" style="color:#a855f7;"></i>确认支付
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 p-3" style="background:rgba(0,0,0,0.2); border-radius:12px; border:1px solid var(--glass-border);">
+                        <div class="row mb-2">
+                            <div class="col-4" style="color:#94a3b8; font-size:0.85rem;">订单编号</div>
+                            <div class="col-8" style="font-family:monospace; font-size:0.85rem;" id="modalOrderNo">-</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4" style="color:#94a3b8; font-size:0.85rem;">房型</div>
+                            <div class="col-8 fw-bold" id="modalRoomName">-</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4" style="color:#94a3b8; font-size:0.85rem;">入住 ~ 离店</div>
+                            <div class="col-8" id="modalDates">-</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4" style="color:#94a3b8; font-size:0.85rem;">数量</div>
+                            <div class="col-8" id="modalQuantity">-</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4" style="color:#94a3b8; font-size:0.85rem;">支付金额</div>
+                            <div class="col-8 fw-bold" style="color:#a855f7; font-size:1.3rem;" id="modalAmount">-</div>
+                        </div>
+                    </div>
+                    <p style="color:#64748b; font-size:0.8rem;"><i class="bi bi-info-circle me-1"></i>点击确认后将模拟支付，订单状态变更为"已支付"。</p>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid var(--glass-border);">
+                    <button type="button" class="btn-custom-outline" data-bs-dismiss="modal" style="border-color:rgba(255,255,255,0.2);">取消</button>
+                    <form id="payForm" method="POST" style="display:inline;">
+                        <button type="submit" class="btn-book-room">
+                            <i class="bi bi-check-lg"></i> 确认支付
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function setPayModal(btn) {
+            var orderId = btn.getAttribute('data-order-id');
+            document.getElementById('modalOrderNo').textContent = btn.getAttribute('data-order-no');
+            document.getElementById('modalRoomName').textContent = btn.getAttribute('data-room-name');
+            document.getElementById('modalDates').textContent = btn.getAttribute('data-check-in') + ' ~ ' + btn.getAttribute('data-check-out');
+            document.getElementById('modalQuantity').textContent = btn.getAttribute('data-quantity') + ' 间';
+            document.getElementById('modalAmount').textContent = '¥ ' + btn.getAttribute('data-amount') + ' 元';
+            document.getElementById('payForm').action = '/orders/' + orderId + '/pay';
+        }
+    </script>
 </body>
 </html>

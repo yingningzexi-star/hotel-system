@@ -2,6 +2,7 @@
 -- USE hotel_db;
 
 -- 1. 删除已存在的表（遵循外键约束删除顺序）
+IF OBJECT_ID('review', 'U') IS NOT NULL DROP TABLE review;
 IF OBJECT_ID('booking_order', 'U') IS NOT NULL DROP TABLE booking_order;
 IF OBJECT_ID('room_inventory', 'U') IS NOT NULL DROP TABLE room_inventory;
 IF OBJECT_ID('room_type', 'U') IS NOT NULL DROP TABLE room_type;
@@ -52,9 +53,24 @@ CREATE TABLE booking_order (
     quantity INT NOT NULL DEFAULT 1,
     unit_price DECIMAL(10, 2) NOT NULL, -- 下单时单价快照
     total_amount DECIMAL(10, 2) NOT NULL,
-    status VARCHAR(20) NOT NULL CHECK (status IN ('BOOKED', 'CANCELLED', 'COMPLETED')),
+    status VARCHAR(20) NOT NULL CHECK (status IN ('BOOKED', 'PAID', 'CHECKED_IN', 'COMPLETED', 'CANCELLED')),
     created_at DATETIME2 NOT NULL DEFAULT GETDATE(),
     cancelled_at DATETIME2 NULL,
+    paid_at DATETIME2 NULL,
     CONSTRAINT FK_booking_order_users FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT FK_booking_order_room_type FOREIGN KEY (room_type_id) REFERENCES room_type(id)
+);
+
+-- 6. 创建评价表 review
+CREATE TABLE review (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    room_type_id BIGINT NOT NULL,
+    order_id BIGINT NOT NULL UNIQUE,
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment NVARCHAR(500) NULL,
+    created_at DATETIME2 NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_review_users FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT FK_review_room_type FOREIGN KEY (room_type_id) REFERENCES room_type(id),
+    CONSTRAINT FK_review_booking_order FOREIGN KEY (order_id) REFERENCES booking_order(id)
 );

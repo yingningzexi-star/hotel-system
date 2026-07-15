@@ -41,6 +41,14 @@
             -webkit-text-fill-color: transparent;
             font-size: 1.5rem;
         }
+        .nav-link-custom {
+            color: #94a3b8 !important;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: #f8fafc !important;
+        }
 
         .main-container { margin-top: 2rem; margin-bottom: 3rem; }
 
@@ -152,13 +160,37 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container">
             <a class="navbar-brand" href="/rooms">Luxe Stay</a>
-            <div class="d-flex align-items-center">
-                <span th:if="${currentUser != null}" class="me-2" style="font-size:0.85rem; color:#94a3b8;">
-                    <i class="bi bi-person"></i> <span th:text="${currentUser.realName}">用户</span>
-                </span>
-                <a class="btn btn-sm btn-glass" th:href="@{/rooms}">
-                    <i class="bi bi-arrow-left"></i> 返回房型列表
-                </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#userNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="userNav">
+                <ul class="navbar-nav align-items-center" th:if="${currentUser != null}">
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-link-custom" href="/rooms">浏览房型</a>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-link-custom" href="/orders">我的订单</a>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link nav-link-custom" href="/profile">个人中心</a>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a th:if="${currentUser.role == 'ADMIN'}" th:href="@{/admin/dashboard}" class="btn btn-sm btn-glass" style="border-color:rgba(168,85,247,0.4); color:#c4b5fd;">
+                            <i class="bi bi-speedometer2"></i> 后台
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-glass" href="/logout" style="border-color:rgba(239,68,68,0.4); color:#fca5a5;">退出登录</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav align-items-center" th:if="${currentUser == null}">
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-glass me-2" href="/login">登录</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-glass" href="/register">注册</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -238,29 +270,78 @@
                         </div>
                     </div>
 
-                    <!-- 操作按钮 -->
-                    <div class="d-flex gap-2 mt-4">
-                        <a th:href="@{/rooms}" class="btn btn-glass flex-fill text-center">
-                            <i class="bi bi-arrow-left"></i> 继续浏览
-                        </a>
+                    <!-- 数量选择 + 预订按钮 -->
+                    <div class="mt-4">
                         <form th:if="${currentUser != null && detail.roomType.status == 1}"
-                              th:action="@{/booking}" method="POST"
-                              class="flex-fill">
+                              th:action="@{/booking}" method="POST">
                             <input type="hidden" name="roomTypeId" th:value="${detail.roomType.id}">
                             <input type="hidden" name="checkIn" th:value="${#temporals.format(checkInDate, 'yyyy-MM-dd')}">
                             <input type="hidden" name="checkOut" th:value="${#temporals.format(checkOutDate, 'yyyy-MM-dd')}">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="btn btn-book w-100">
-                                <i class="bi bi-cart-check"></i> 立即预订
-                            </button>
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="info-label mb-1">预订数量</label>
+                                    <input type="number" name="quantity" value="1" min="1" max="10"
+                                           class="form-control" style="background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); border-radius:12px; color:#f8fafc; padding:0.6rem 1rem;">
+                                </div>
+                                <div class="col-md-5">
+                                    <button type="submit" class="btn btn-book w-100">
+                                        <i class="bi bi-cart-check"></i> 立即预订
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <a th:href="@{/rooms}" class="btn btn-glass w-100 text-center">
+                                        <i class="bi bi-arrow-left"></i> 继续浏览
+                                    </a>
+                                </div>
+                            </div>
                         </form>
-                        <a th:if="${currentUser == null}"
-                           th:href="@{/login}"
-                           class="btn btn-book flex-fill text-center">
-                            <i class="bi bi-box-arrow-in-right"></i> 登录后预订
-                        </a>
+                        <div th:if="${currentUser == null}" class="d-flex gap-2">
+                            <a th:href="@{/rooms}" class="btn btn-glass flex-fill text-center">
+                                <i class="bi bi-arrow-left"></i> 继续浏览
+                            </a>
+                            <a th:href="@{/login}" class="btn btn-book flex-fill text-center">
+                                <i class="bi bi-box-arrow-in-right"></i> 登录后预订
+                            </a>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 评价区域 -->
+        <div class="glass-card mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0" style="color:#e2e8f0;">
+                    <i class="bi bi-star-fill" style="color:#fbbf24;"></i> 住客评价
+                </h5>
+                <div>
+                    <span style="color:#fbbf24; font-size:1.5rem; font-weight:800;" th:text="${#numbers.formatDecimal(avgRating, 1, 1)}">4.5</span>
+                    <span style="color:#64748b;"> / 5</span>
+                    <span style="color:#64748b; font-size:0.85rem;" class="ms-2">
+                        (<span th:text="${reviewCount}">0</span> 条评价)
+                    </span>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-4">
+                <i class="bi bi-chat-square-text" style="font-size:2rem; color: rgba(255,255,255,0.08);"></i>
+                <p class="mt-2" style="color:#64748b;">暂无评价，成为第一个评价的人吧！</p>
+            </div>
+
+            <div th:each="review : ${reviews}" style="border-bottom:1px solid rgba(255,255,255,0.04); padding:1rem 0;">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span style="color:#cbd5e1; font-weight:600;" th:text="${review.user.realName}">张三</span>
+                        <span style="color:#fbbf24; margin-left:0.5rem;">
+                            <i th:each="i : ${#numbers.sequence(1, 5)}"
+                               th:class="${i <= review.rating} ? 'bi bi-star-fill' : 'bi bi-star'"
+                               style="font-size:0.8rem;" class="bi"></i>
+                        </span>
+                    </div>
+                    <span style="color:#64748b; font-size:0.75rem;" th:text="${#temporals.format(review.createdAt, 'yyyy-MM-dd')}">2026-07-14</span>
+                </div>
+                <p th:if="${review.comment != null && !review.comment.isEmpty()}"
+                   style="color:#94a3b8; margin-top:0.5rem; margin-bottom:0;" th:text="${review.comment}"></p>
             </div>
         </div>
     </div>
