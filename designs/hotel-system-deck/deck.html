@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxe Stay 酒店在线预订平台 - 答辩汇报</title>
+    <!-- 引入 Bootstrap Icons 用于图标展示 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --bg-card: rgba(30, 41, 59, 0.45);
+            --accent-cyan: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-orange: #fb923c;
+            --accent-green: #4ade80;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+            
+            --type-title: 56px;
+            --type-subtitle: 36px;
+            --type-body: 26px;
+            --type-small: 20px;
+            --pad-top: 80px;
+            --pad-bottom: 70px;
+            --pad-x: 90px;
+            --gap-title: 40px;
+            --gap-item: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* 强制每个 slide 的 wrapper 填满 stage */
+        section[data-label] > *:not(img):not(picture):not(video):not(svg):not(canvas) {
+            height: 100%;
+        }
+
+        .slide-container {
+            padding: var(--pad-top) var(--pad-x) var(--pad-bottom);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            background: radial-gradient(circle at 85% 15%, rgba(192, 132, 252, 0.12), transparent 45%),
+                        radial-gradient(circle at 15% 85%, rgba(56, 189, 248, 0.08), transparent 45%),
+                        #0b0f19;
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+        }
+
+        /* 顶部装饰条 */
+        .slide-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-orange));
+        }
+
+        /* 统一页眉 */
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--gap-title);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .slide-topic {
+            font-size: var(--type-small);
+            color: var(--accent-cyan);
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .slide-logo {
+            font-size: var(--type-small);
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 幻灯片标题 */
+        .slide-title {
+            font-size: var(--type-title);
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            line-height: 1.25;
+            background: linear-gradient(to right, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .slide-title-desc {
+            font-size: var(--type-small);
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        /* 常用网格布局 */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* 卡片设计 */
+        .card-custom {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            height: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-custom:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin: 0 0 15px 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title i {
+            color: var(--accent-cyan);
+            font-size: 28px;
+        }
+
+        .card-content {
+            font-size: 20px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .card-content ul {
+            padding-left: 20px;
+            margin: 10px 0 0 0;
+        }
+
+        .card-content li {
+            margin-bottom: 8px;
+        }
+
+        /* 高亮数值大字报 */
+        .stat-number {
+            font-size: 80px;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: var(--type-small);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* 标志性点缀 */
+        .badge-custom {
+            display: inline-block;
+            padding: 6px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 20px;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        /* 封面页样式 */
+        .cover-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
+                        #0b0f19;
+        }
+
+        .cover-title {
+            font-size: 72px;
+            font-weight: 900;
+            margin: 0 0 20px 0;
+            background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .cover-subtitle {
+            font-size: 32px;
+            color: var(--accent-cyan);
+            font-weight: 500;
+            margin-bottom: 60px;
+            letter-spacing: 0.05em;
+        }
+
+        .cover-meta {
+            display: flex;
+            gap: 40px;
+            font-size: 20px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            width: 60%;
+            justify-content: center;
+        }
+
+        .cover-meta-item strong {
+            color: var(--text-primary);
+        }
+
+        /* 流程步骤设计 */
+        .flow-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .flow-step {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .flow-arrow {
+            padding: 0 20px;
+            color: var(--accent-cyan);
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flow-step-num {
+            width: 36px;
+            height: 36px;
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+            font-weight: 800;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        /* 代码框样式 */
+        .code-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: Consolas, Monaco, "Andale Mono", monospace;
+            font-size: 16px;
+            color: #e2e8f0;
+            overflow-x: auto;
+            line-height: 1.5;
+            height: 100%;
+        }
+
+        .code-comment {
+            color: #64748b;
+        }
+
+        .code-keyword {
+            color: #c084fc;
+            font-weight: bold;
+        }
+
+        .code-string {
+            color: #38bdf8;
+        }
+
+        .code-annotation {
+            color: #fb923c;
+        }
+    </style>
+</head>
+<body>
+
+<deck-stage width="1920" height="1080">
+
+    <!-- Slide 1: 封面 -->
+    <section data-label="封面">
+        <div class="cover-wrapper">
+            <div class="badge-custom">Course Design Presentation</div>
+            <h1 class="cover-title">Luxe Stay 酒店在线预订平台</h1>
+            <p class="cover-subtitle">基于 Spring Boot 与 SQL Server 的高并发与信用机制设计</p>
+            <div class="cover-meta">
+                <div class="cover-meta-item">汇报方向：<strong>后端系统设计与 Git 协作</strong></div>
+                <div class="cover-meta-item">系统架构：<strong>Spring Boot + JPA + SQL Server</strong></div>
+                <div class="cover-meta-item">汇报时间：<strong>2026年7月</strong></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 2: 系统概述 -->
+    <section data-label="系统概述">
+        <div class="slide-container">
+            <div class="slide-header">
+                <span class="slide-topic">01 / 项目背景</span>
+                <span class="slide-logo">Luxe Stay</span>
+            </div>
+            <h2 class="slide-title">项目背景与系统概述</h2>
+            <p class="slide-title-desc">针对现代酒店预订中的高并发抢房、恶意取消订单及权限访问漏洞，提供一站式业务解决方案。</p>
+            
+            <div class="grid-2">
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-bullseye"></i>
+                        <span>系统业务定位</span>
+                    </div>
+                    <div class="card-content">
+                        <p><strong>Luxe Stay</strong> 定位于中高端雅奢酒店预订。除了提供常规的房型展示、库存管理、在线下单流程外，系统围绕核心教学与业务指标，重点落实了以下业务规则：</p>
+                        <ul>
+                            <li><strong>多天连续预订</strong>：系统支持用户一次性选择预订多天，并在下单时对选择区间内的每日库存执行严格校验。</li>
+                            <li><strong>信用惩罚防护</strong>：针对频繁恶意取消订单的行为，提供动态锁定的信用限制规则。</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-shield-exclamation"></i>
+                        <span>针对性的三大业务痛点</span>
+                    </div>
+                    <div class="card-content">
+                        <ul>
+                            <li><strong>高并发下的超卖问题</strong>：防止同一间房在同一时间被多名用户抢单成功，造成库存倒扣。</li>
+                            <li><strong>恶意频繁退订风险</strong>：避免预订库存被长期占用后退订，影响酒店的实际入住率与收益。</li>
+                            <li><strong>后台管理越权风险</strong>：防范普通用户通过手动篡改 URL 绕过前端导航，非法侵入后台管理系统。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: 技术选型 -->
+    <section data-label="技术选型">
+        <div class="slide-container">
+            <div class="slide-header">
+                <span class="slide-topic">02 / 系统架构</span>
+                <span class="slide-logo">Luxe Stay</span>
+            </div>
+            <h2 class="slide-title">系统架构与技术选型</h2>
+            <p class="slide-title-desc">系统基于经典的 MVC 分层架构，选用成熟且高效的技术栈，确保高可用与高一致性。</p>
+            
+            <div class="grid-4">
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-window-sidebar"></i>
+                        <span>前端渲染层</span>
+                    </div>
+                    <div class="card-content">
+                        <p><strong>Thymeleaf & Bootstrap 5</strong></p>
+                        <ul>
+                            <li>动态模板引擎同步渲染，避免单页应用的首屏加载延迟。</li>
+                            <li>自适应响应式栅格，适配手机与 PC 浏览器。</li>
+                            <li>引入 Custom CSS，打造暗黑高端玻璃拟态视觉风格。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-cpu"></i>
+                        <span>业务与控制层</span>
+                    </div>
+                    <div class="card-content">
+                        <p><strong>Spring Boot 3.x</strong></p>
+                        <ul>
+                            <li>基于 MVC 分层架构，统一控制器逻辑。</li>
+                            <li>自定义 `LoginInterceptor` 拦截器，自动校验 Session 状态。</li>
+                            <li>提供全局异常处理机制，保障线上服务的优雅降级。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-database-fill-gear"></i>
+                        <span>数据持久层</span>
+                    </div>
+                    <div class="card-content">
+                        <p><strong>Spring Data JPA</strong></p>
+                        <ul>
+                            <li>基于 Hibernate 6 进行高效的对象关系映射（ORM）。</li>
+                            <li>使用 `@Transactional` 保障多步写操作的事务原子性。</li>
+                            <li>利用 Repository 接口，支持底层锁机制和乐观锁版本标记。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-database-fill"></i>
+                        <span>数据存储层</span>
+                    </div>
+                    <div class="card-content">
+                        <p><strong>SQL Server 2025</strong></p>
+                        <ul>
+                            <li>使用 Microsoft SQL Server Express 作为关系型数据库。</li>
+                            <li>利用外键约束与联合唯一键（`UQ_room_inventory`）防止脏数据。</li>
+                            <li>启用强 CHECK 约束，保证状态字段的字段一致性。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 4: 权限拦截 -->
+    <section data-label="权限拦截">
+        <div class="slide-container">
+            <div class="slide-header">
+                <span class="slide-topic">03 / 权限安全</span>
+                <span class="slide-logo">Luxe Stay</span>
+            </div>
+            <h2 class="slide-title">用户管理与权限拦截机制</h2>
+            <p class="slide-title-desc">利用拦截器在后端构建第一道安全防火墙，实现普通用户与管理员的严格角色隔离。</p>
+            
+            <div class="grid-2">
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-funnel"></i>
+                        <span>拦截器 (Interceptor) 工作流</span>
+                    </div>
+                    <div class="card-content">
+                        <p>系统未采用复杂的安全框架，而是使用轻量级的高效的 **`HandlerInterceptor`** 进行安全把关：</p>
+                        <ul>
+                            <li><strong>注册拦截器</strong>：在 `WebConfig` 中配置拦截器拦截除登录、注册、首页及静态资源外的所有请求。</li>
+                            <li><strong>双重权限隔离</strong>：
+                                <ul>
+                                    <li>第一层：校验 Session 中是否存在登录用户（未登录重定向至 `/login`）。</li>
+                                    <li>第二层：对于 `/admin/**` 路由，额外校验 `User.getRole()` 是否为 `'ADMIN'`，若非管理员则抛出权限异常重定向至 `403.html`。</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="code-box">
+                    <span class="code-annotation">@Component</span><br>
+                    <span class="code-keyword">public class</span> <span style="color:#f3f4f6;">LoginInterceptor</span> <span class="code-keyword">implements</span> <span style="color:#e2e8f0;">HandlerInterceptor</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-annotation">@Override</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">public boolean</span> <span style="color:#60a5fa;">preHandle</span>(HttpServletRequest req, HttpServletResponse resp, Object h) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;User user = (User) req.getSession().getAttribute(<span class="code-string">"user"</span>);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if</span> (user == <span class="code-keyword">null</span>) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;resp.sendRedirect(<span class="code-string">"/login"</span>);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return false</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// 后端拦截管理员路由，防范越权</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if</span> (req.getRequestURI().startsWith(<span class="code-string">"/admin"</span>) && !<span class="code-string">"ADMIN"</span>.equals(user.getRole())) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;resp.sendRedirect(<span class="code-string">"/403"</span>);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return false</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return true</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: 库存校验 -->
+    <section data-label="库存校验">
+        <div class="slide-container">
+            <div class="slide-header">
+                <span class="slide-topic">04 / 核心业务</span>
+                <span class="slide-logo">Luxe Stay</span>
+            </div>
+            <h2 class="slide-title">多天预订与跨天库存校验</h2>
+            <p class="slide-title-desc">支持跨天预订，使用严格的逐日校验算法，在事务控制下保障库存扣减的准确性。</p>
+            
+            <div class="flow-container">
+                <div class="flow-step">
+                    <div class="flow-step-num">1</div>
+                    <h4 style="margin: 0 0 10px 0; font-size: 20px;">查询并锁定范围</h4>
+                    <p style="margin: 0; font-size: 16px; color: var(--text-secondary);">用户选择入住与离店日期，限制预订范围在未来 7 天内。</p>
+                </div>
+                <div class="flow-arrow"><i class="bi bi-arrow-right-short"></i></div>
+                <div class="flow-step">
+                    <div class="flow-step-num">2</div>
+                    <h4 style="margin: 0 0 10px 0; font-size: 20px;">逐日库存校验</h4>
+                    <p style="margin: 0; font-size: 16px; color: var(--text-secondary);">循环获取区间内每一天的 `RoomInventory` 记录，校验剩余数量是否充足。</p>
+                </div>
+                <div class="flow-arrow"><i class="bi bi-arrow-right-short"></i></div>
+                <div class="flow-step">
+                    <div class="flow-step-num">3</div>
+                    <h4 style="margin: 0 0 10px 0; font-size: 20px;">扣减库存并快照</h4>
+                    <p style="margin: 0; font-size: 16px; color: var(--text-secondary);">扣减对应日期的库存，创建订单并保存下单时的单价快照。</p>
+                </div>
+                <div class="flow-arrow"><i class="bi bi-arrow-right-short"></i></div>
+                <div class="flow-step">
+                    <div class="flow-step-num">4</div>
+                    <h4 style="margin: 0 0 10px 0; font-size: 20px;">事务原子提交</h4>
+                    <p style="margin: 0; font-size: 16px; color: var(--text-secondary);">`@Transactional` 保护。期间任何一天库存不足，全流程自动 Rollback。</p>
+                </div>
+            </div>
+
+            <div class="card-custom" style="margin-top: 30px;">
+                <div class="card-title">
+                    <i class="bi bi-check-circle-fill" style="color: var(--accent-green);"></i>
+                    <span>跨天扣减机制的优势</span>
+                </div>
+                <div class="card-content">
+                    <p>传统的单日扣库存无法应对跨天场景。Luxe Stay 通过在 `room_inventory` 表中设计 `(room_type_id, inventory_date)` 的联合唯一索引，并使用 `saveAll()` 批量持久化更新，将多天校验时间复杂度控制在 O(N)。一旦中途库存扣减冲突，数据库的约束 and Spring 事务会立刻撤销该笔订单，彻底杜绝数据不一致。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 6: 信用机制 -->
+    <section data-label="信用机制">
+        <div class="slide-container">
+            <div class="slide-header">
+                <span class="slide-topic">05 / 信用机制</span>
+                <span class="slide-logo">Luxe Stay</span>
+            </div>
+            <h2 class="slide-title">信用惩罚与违约禁订逻辑</h2>
+            <p class="slide-title-desc">首创“取消限额 + 自动禁订期限”的信用防护机制，最大限度保障商家免受恶意占房带来的财务损失。</p>
+            
+            <div class="grid-3" style="margin-top: 20px;">
+                <div class="card-custom" style="text-align: center;">
+                    <div class="stat-number">3 次</div>
+                    <div class="stat-label">累计取消上限</div>
+                    <div class="card-content" style="margin-top: 15px; text-align: left;">
+                        当用户手动取消已预订的订单时，系统将通过 `userService` 累加该用户的 `cancelCount`（取消订单数）。
+                    </div>
+                </div>
+
+                <div class="card-custom" style="text-align: center;">
+                    <div class="stat-number" style="background: linear-gradient(135deg, var(--accent-orange), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">7 天</div>
+                    <div class="stat-label">预订禁止惩罚期</div>
+                    <div class="card-content" style="margin-top: 15px; text-align: left;">
+                        当取消次数达到 3 次时，系统会自动将用户的 `bannedUntil` 属性设定为当前时间往后顺延 7 天。
+                    </div>
+                </div>
+
+                <div class="card-custom" style="text-align: center;">
+                    <div class="stat-number" style="background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">自动</div>
+                    <div class="stat-label">惩罚解除与清零</div>
+                    <div class="card-content" style="margin-top: 15px; text-align: left;">
+                        当禁订期满后，用户再次尝试下单时，系统会自动清零该账号的取消次数，并自动恢复正常的预订权限。
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom" style="margin-top: 30px;">
+                <div class="card-title">
+                    <i class="bi bi-clock-history"></i>
+                    <span>取消时间限制约束</span>
+                </div>
+                <div class="card-content">
+                    <p>除了取消次数外，系统规定用户<strong>至少需要提前 1 天</strong>取消订单。如果当前系统时间已到达入住当天，则用户端的“取消订单”按钮将不再允许发起操作。这有效防止了用户在临近入住前恶意占用房间库存的情形。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 7: 并发安全 -->
+    <section data-label="并发安全">
+        <div class="slide-container">
+            <div class="slide-header">
+                <span class="slide-topic">06 / 系统安全</span>
+                <span class="slide-logo">Luxe Stay</span>
+            </div>
+            <h2 class="slide-title">高并发安全与越权防范设计</h2>
+            <p class="slide-title-desc">在底层构建多重锁保护，保障高并发请求下共享资源的读写安全，并强化越权防范。</p>
+            
+            <div class="grid-2">
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-shield-check"></i>
+                        <span>高并发抢房安全保障</span>
+                    </div>
+                    <div class="card-content">
+                        <p>在高并发场景下（如两名用户同时提交最后一个房间），单纯依靠 Java 代码中的 if 判断极易发生“超卖”：</p>
+                        <ul>
+                            <li><strong>行级锁保护 (Pessimistic Write)</strong>：在底层 JPA 查询每日库存记录时，采用行锁机制，阻塞其它并发事务对同房型同日期库存的修改。</li>
+                            <li><strong>数据库强约束拦截</strong>：在 `room_inventory` 表上设有 `available_quantity >= 0` 的 CHECK 约束。若并发导致库存扣减至负数，数据库将直接抛出异常，引发 Spring 事务回滚。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-lock"></i>
+                        <span>越权防范与本地约束迁移</span>
+                    </div>
+                    <div class="card-content">
+                        <ul>
+                            <li><strong>后端路由强制拦截</strong>：除了前端对“管理后台”按钮的条件隐藏外，所有 `/admin/**` 请求必须经由拦截器做二次角色比对。任何企图手动通过 URL 越权的行为都会被抛回 403 页面。</li>
+                            <li><strong>本地数据库约束迁移</strong>：
+                                针对本地开发环境下旧的数据库约束（如 `CK__booking_o__status`）引发的支付报错，通过运行专门的迁移脚本，重构了包含全部 5 种状态在内的完整字段约束，保障数据一致性。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 8: 项目总结 -->
+    <section data-label="项目总结">
+        <div class="slide-container">
+            <div class="slide-header">
+                <span class="slide-topic">07 / 团队总结</span>
+                <span class="slide-logo">Luxe Stay</span>
+            </div>
+            <h2 class="slide-title">团队协作与项目总结</h2>
+            <p class="slide-title-desc">本项目是一个符合现代企业开发标准的多分支协作和严谨业务闭环的工程实践。</p>
+            
+            <div class="grid-3">
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-git"></i>
+                        <span>Git 多分支规范协作</span>
+                    </div>
+                    <div class="card-content">
+                        <p>拒绝在 `main` 分支上直接修改代码。团队成员基于各自功能点拉取 `feature/xxx` 分支在本地草稿纸上开发，开发完毕推送后，统一在 GitHub 上发起 Pull Request，评审无误后合并。这确保了主干代码库的稳定与清洁。</p>
+                    </div>
+                </div>
+
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-journal-check"></i>
+                        <span>严谨的业务闭环</span>
+                    </div>
+                    <div class="card-content">
+                        <p>从用户注册、多天库存严格扣减，到防恶意退订的信用自动惩罚机制，再到管理员后台的安全越权防御，项目在后端形成了完整的、自洽的业务逻辑闭环，所有状态流转均受到底层数据库与应用级事务的严密防护。</p>
+                    </div>
+                </div>
+
+                <div class="card-custom">
+                    <div class="card-title">
+                        <i class="bi bi-award"></i>
+                        <span>课设答辩核心支撑</span>
+                    </div>
+                    <div class="card-content">
+                        <p>本项目通过并发安全演练（抢房超卖控制）、时间窗口取消限制、以及信用期满自动恢复等场景的真实测试，全面回应了指导老师在重点和难点部分的提问，极佳地支撑了课程目标 1 和 2 的达成。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px; font-size: 24px; font-weight: 700; color: var(--accent-cyan);">
+                汇报结束，感谢老师与同学的聆听！
+            </div>
+        </div>
+    </section>
+
+</deck-stage>
+
+<script src="deck-stage.js"></script>
+</body>
+</html>
