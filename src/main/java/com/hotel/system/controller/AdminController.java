@@ -2,9 +2,9 @@ package com.hotel.system.controller;
 
 import com.hotel.system.entity.BookingOrder;
 import com.hotel.system.entity.User;
-import com.hotel.system.repository.BookingOrderRepository;
-import com.hotel.system.repository.RoomTypeRepository;
-import com.hotel.system.repository.UserRepository;
+import com.hotel.system.service.BookingService;
+import com.hotel.system.service.RoomService;
+import com.hotel.system.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,13 +23,13 @@ import java.util.List;
 public class AdminController {
 
     @Autowired
-    private BookingOrderRepository bookingOrderRepository;
+    private BookingService bookingService;
 
     @Autowired
-    private RoomTypeRepository roomTypeRepository;
+    private RoomService roomService;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -41,25 +41,23 @@ public class AdminController {
         LocalDateTime monthStart = today.withDayOfMonth(1).atStartOfDay();
         LocalDateTime monthEnd = today.withDayOfMonth(today.lengthOfMonth()).atTime(LocalTime.MAX);
 
-        long todayCheckins = bookingOrderRepository.countByStatusAndCheckInDate("PAID", today);
-        long todayCheckouts = bookingOrderRepository.countByStatusAndCheckOutDate("CHECKED_IN", today);
-        BigDecimal monthRevenue = bookingOrderRepository.sumRevenueBetween(monthStart, monthEnd);
-        if (monthRevenue == null) monthRevenue = BigDecimal.ZERO;
+        long todayCheckins = bookingService.countTodayCheckins(today);
+        long todayCheckouts = bookingService.countTodayCheckouts(today);
+        BigDecimal monthRevenue = bookingService.sumRevenueBetween(monthStart, monthEnd);
 
-        long checkedInNow = bookingOrderRepository.countByStatus("CHECKED_IN");
-        long totalRooms = roomTypeRepository.sumTotalQuantityByStatusActive();
+        long checkedInNow = bookingService.countByStatus("CHECKED_IN");
+        long totalRooms = roomService.sumTotalQuantityByActiveRoomTypes();
         long occupancyPct = totalRooms > 0 ? (checkedInNow * 100) / totalRooms : 0;
 
         LocalDateTime todayStart = today.atStartOfDay();
         LocalDateTime todayEnd = today.atTime(LocalTime.MAX);
-        BigDecimal todayRevenue = bookingOrderRepository.sumRevenueBetween(todayStart, todayEnd);
-        if (todayRevenue == null) todayRevenue = BigDecimal.ZERO;
+        BigDecimal todayRevenue = bookingService.sumRevenueBetween(todayStart, todayEnd);
 
-        long totalOrders = bookingOrderRepository.count();
-        long totalUsers = userRepository.count();
-        long activeRoomTypes = roomTypeRepository.countByStatus(1);
+        long totalOrders = bookingService.countTotalOrders();
+        long totalUsers = userService.countTotalUsers();
+        long activeRoomTypes = roomService.countActiveRoomTypes();
 
-        List<BookingOrder> recentOrders = bookingOrderRepository.findTop5ByOrderByCreatedAtDesc();
+        List<BookingOrder> recentOrders = bookingService.getRecentOrders(5);
 
         model.addAttribute("todayCheckins", todayCheckins);
         model.addAttribute("todayCheckouts", todayCheckouts);

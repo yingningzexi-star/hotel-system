@@ -166,4 +166,11 @@ public class UserService {
         }
         return userRepository.findAll();
     }
+
+    /**
+     * 统计用户总数（Dashboard 统计用）
+     */
+    public long countTotalUsers() {
+        return userRepository.count();
+    }
 }

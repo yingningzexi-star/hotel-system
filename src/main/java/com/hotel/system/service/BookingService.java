@@ -8,6 +8,8 @@ import com.hotel.system.repository.BookingOrderRepository;
 import com.hotel.system.repository.RoomInventoryRepository;
 import com.hotel.system.repository.RoomTypeRepository;
 import com.hotel.system.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,8 @@ import java.util.List;
 
 @Service
 public class BookingService {
+
+    private static final Logger log = LoggerFactory.getLogger(BookingService.class);
 
     @Autowired
     private BookingOrderRepository bookingOrderRepository;
@@ -130,6 +134,11 @@ public class BookingService {
         List<RoomInventory> inventories = roomInventoryRepository
                 .findByRoomTypeIdAndInventoryDateInForUpdate(order.getRoomType().getId(), dates);
 
+        if (inventories.size() != dates.size()) {
+            log.warn("取消订单 {} 时，部分日期库存记录缺失（期望 {} 条，实际找到 {} 条），缺失日期的库存将不被恢复",
+                    orderId, dates.size(), inventories.size());
+        }
+
         for (RoomInventory inv : inventories) {
             inv.setAvailableQuantity(inv.getAvailableQuantity() + order.getQuantity());
         }
@@ -167,6 +176,7 @@ public class BookingService {
         }
 
         order.setStatus("CHECKED_IN");
+        order.setCheckedInAt(LocalDateTime.now());
         return bookingOrderRepository.save(order);
     }
 
@@ -180,6 +190,7 @@ public class BookingService {
         }
 
         order.setStatus("COMPLETED");
+        order.setCompletedAt(LocalDateTime.now());
         return bookingOrderRepository.save(order);
     }
 
@@ -197,6 +208,7 @@ public class BookingService {
         }
 
         order.setStatus("CHECKED_IN");
+        order.setCheckedInAt(LocalDateTime.now());
         return bookingOrderRepository.save(order);
     }
 
@@ -210,6 +222,7 @@ public class BookingService {
         }
 
         order.setStatus("COMPLETED");
+        order.setCompletedAt(LocalDateTime.now());
         return bookingOrderRepository.save(order);
     }
 
@@ -253,5 +266,32 @@ public class BookingService {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         int random = (int) (Math.random() * 9000) + 1000;
         return "ORD" + timestamp + random;
+    }
+
+    // ==================== Dashboard 统计（供 AdminController 使用） ====================
+
+    public long countTodayCheckins(LocalDate today) {
+        return bookingOrderRepository.countByStatusAndCheckInDate("PAID", today);
+    }
+
+    public long countTodayCheckouts(LocalDate today) {
+        return bookingOrderRepository.countByStatusAndCheckOutDate("CHECKED_IN", today);
+    }
+
+    public java.math.BigDecimal sumRevenueBetween(LocalDateTime start, LocalDateTime end) {
+        java.math.BigDecimal result = bookingOrderRepository.sumRevenueBetween(start, end);
+        return result != null ? result : java.math.BigDecimal.ZERO;
+    }
+
+    public long countByStatus(String status) {
+        return bookingOrderRepository.countByStatus(status);
+    }
+
+    public long countTotalOrders() {
+        return bookingOrderRepository.count();
+    }
+
+    public List<BookingOrder> getRecentOrders(int limit) {
+        return bookingOrderRepository.findTop5ByOrderByCreatedAtDesc();
     }
 }

@@ -165,8 +165,9 @@ public class RoomService {
      */
     @Transactional
     public void generateInventoryForDays(Long roomTypeId, Integer totalQuantity, LocalDate startDate, int days) {
-        RoomType roomType = getRoomTypeById(roomTypeId);
+        getRoomTypeById(roomTypeId); // 校验房型存在
 
+        List<RoomInventory> toSave = new ArrayList<>();
         for (int i = 0; i < days; i++) {
             LocalDate date = startDate.plusDays(i);
             // 如果该日已有库存记录，跳过
@@ -177,7 +178,10 @@ public class RoomService {
             inventory.setRoomTypeId(roomTypeId);
             inventory.setInventoryDate(date);
             inventory.setAvailableQuantity(totalQuantity);
-            roomInventoryRepository.save(inventory);
+            toSave.add(inventory);
+        }
+        if (!toSave.isEmpty()) {
+            roomInventoryRepository.saveAll(toSave);
         }
     }
 
@@ -189,15 +193,19 @@ public class RoomService {
     public void syncInventoryQuantity(Long roomTypeId, Integer newTotalQuantity) {
         List<RoomInventory> inventories = getInventoryByRoomType(roomTypeId);
         LocalDate today = LocalDate.now();
+        List<RoomInventory> toSave = new ArrayList<>();
         for (RoomInventory inv : inventories) {
             if (!inv.getInventoryDate().isBefore(today)) { // 今天及未来的日期
                 // 如果当前可用数量 > 新的总数量，则调低到新总数量
                 // 但不会调高（避免覆盖已扣减的预订数据）
                 if (inv.getAvailableQuantity() > newTotalQuantity) {
                     inv.setAvailableQuantity(newTotalQuantity);
-                    roomInventoryRepository.save(inv);
+                    toSave.add(inv);
                 }
             }
+        }
+        if (!toSave.isEmpty()) {
+            roomInventoryRepository.saveAll(toSave);
         }
     }
 
@@ -289,53 +297,16 @@ public class RoomService {
         return result;
     }
 
-    // ==================== 库存扣减/恢复（供 C 成员预订模块调用） ====================
+    // ==================== Dashboard 统计（供 AdminController 使用） ====================
 
-    /**
-     * 扣减库存（预订时调用）
-     * 逐日扣减，任一日库存不足则回滚
-     */
-    @Transactional
-    public boolean deductInventory(Long roomTypeId, LocalDate checkInDate, LocalDate checkOutDate, int quantity) {
-        LocalDate date = checkInDate;
-        while (date.isBefore(checkOutDate)) {
-            Optional<RoomInventory> opt = roomInventoryRepository
-                    .findByRoomTypeIdAndInventoryDate(roomTypeId, date);
-            if (opt.isEmpty() || opt.get().getAvailableQuantity() < quantity) {
-                throw new IllegalStateException("库存不足：" + date.toString());
-            }
-            date = date.plusDays(1);
-        }
-
-        // 检查通过，执行扣减
-        date = checkInDate;
-        while (date.isBefore(checkOutDate)) {
-            Optional<RoomInventory> opt = roomInventoryRepository
-                    .findByRoomTypeIdAndInventoryDate(roomTypeId, date);
-            RoomInventory inv = opt.get();
-            inv.setAvailableQuantity(inv.getAvailableQuantity() - quantity);
-            roomInventoryRepository.save(inv);
-            date = date.plusDays(1);
-        }
-        return true;
+    /** 查询所有启用房型的总房间数（用于计算入住率） */
+    public long sumTotalQuantityByActiveRoomTypes() {
+        return roomTypeRepository.sumTotalQuantityByStatusActive();
     }
 
-    /**
-     * 恢复库存（取消订单时调用）
-     */
-    @Transactional
-    public boolean restoreInventory(Long roomTypeId, LocalDate checkInDate, LocalDate checkOutDate, int quantity) {
-        LocalDate date = checkInDate;
-        while (date.isBefore(checkOutDate)) {
-            Optional<RoomInventory> opt = roomInventoryRepository
-                    .findByRoomTypeIdAndInventoryDate(roomTypeId, date);
-            if (opt.isPresent()) {
-                RoomInventory inv = opt.get();
-                inv.setAvailableQuantity(inv.getAvailableQuantity() + quantity);
-                roomInventoryRepository.save(inv);
-            }
-            date = date.plusDays(1);
-        }
-        return true;
+    /** 统计启用中的房型数量 */
+    public long countActiveRoomTypes() {
+        return roomTypeRepository.countByStatus(1);
     }
+
 }

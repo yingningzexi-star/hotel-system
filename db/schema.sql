@@ -57,6 +57,8 @@ CREATE TABLE booking_order (
     created_at DATETIME2 NOT NULL DEFAULT GETDATE(),
     cancelled_at DATETIME2 NULL,
     paid_at DATETIME2 NULL,
+    checked_in_at DATETIME2 NULL,   -- 实际入住时间
+    completed_at DATETIME2 NULL,    -- 实际退房时间
     CONSTRAINT FK_booking_order_users FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT FK_booking_order_room_type FOREIGN KEY (room_type_id) REFERENCES room_type(id)
 );
