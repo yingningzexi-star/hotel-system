@@ -56,4 +56,10 @@ public class BookingOrder {
 
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
+
+    @Column(name = "checked_in_at")
+    private LocalDateTime checkedInAt;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
 }

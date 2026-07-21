@@ -5,6 +5,8 @@ import com.hotel.system.entity.User;
 import com.hotel.system.service.ReviewService;
 import com.hotel.system.service.RoomService;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +20,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/rooms")
 public class RoomController {
+
+    private static final Logger log = LoggerFactory.getLogger(RoomController.class);
 
     @Autowired
     private RoomService roomService;
@@ -87,6 +91,7 @@ public class RoomController {
             model.addAttribute("checkOutDate", checkOutDate != null ? checkOutDate : LocalDate.now().plusDays(2));
 
         } catch (Exception e) {
+            log.warn("房型列表查询失败，将使用默认参数重试: {}", e.getMessage());
             model.addAttribute("error", e.getMessage());
             model.addAttribute("checkInDate", LocalDate.now().plusDays(1));
             model.addAttribute("checkOutDate", LocalDate.now().plusDays(2));
@@ -94,10 +99,12 @@ public class RoomController {
             model.addAttribute("totalPages", 0);
             model.addAttribute("totalItems", 0);
             try {
-                List<Map<String, Object>> availableRooms = roomService.getAvailableRooms(null, null);
-                model.addAttribute("availableRooms", availableRooms);
+                List<Map<String, Object>> fallbackRooms = roomService.getAvailableRooms(null, null);
+                model.addAttribute("availableRooms", fallbackRooms);
             } catch (Exception ex) {
-                model.addAttribute("error", ex.getMessage());
+                log.error("回退查询也失败: {}", ex.getMessage(), ex);
+                // 保留原始错误信息，不覆盖
+                model.addAttribute("availableRooms", java.util.Collections.emptyList());
             }
         }
 
