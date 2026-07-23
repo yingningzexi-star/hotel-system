@@ -232,28 +232,48 @@ public class RoomService {
         // 1. 获取所有启用房型
         List<RoomType> activeRooms = getActiveRoomTypes();
 
-        // 2. 查询这些房型在日期范围内的库存
+        // 2. 计算每晚所需天数
+        long nights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+
+        // 3. 自动补齐缺失的库存记录（无库存记录 = 无预订 = 全部可用）
+        for (RoomType room : activeRooms) {
+            List<LocalDate> neededDates = checkInDate.datesUntil(checkOutDate).toList();
+            List<LocalDate> missingDates = new ArrayList<>();
+            for (LocalDate date : neededDates) {
+                if (roomInventoryRepository.findByRoomTypeIdAndInventoryDate(room.getId(), date).isEmpty()) {
+                    missingDates.add(date);
+                }
+            }
+            if (!missingDates.isEmpty()) {
+                for (LocalDate date : missingDates) {
+                    RoomInventory inv = new RoomInventory();
+                    inv.setRoomTypeId(room.getId());
+                    inv.setInventoryDate(date);
+                    inv.setAvailableQuantity(room.getTotalQuantity());
+                    roomInventoryRepository.save(inv);
+                }
+            }
+        }
+
+        // 4. 查询这些房型在日期范围内的库存
         List<Long> roomTypeIds = activeRooms.stream().map(RoomType::getId).collect(Collectors.toList());
         List<RoomInventory> inventories = roomInventoryRepository.findByRoomTypeIdsAndDateRange(
                 roomTypeIds, checkInDate, checkOutDate.minusDays(1)); // 离店日不占库存
 
-        // 3. 按房型分组
+        // 5. 按房型分组
         Map<Long, List<RoomInventory>> inventoryMap = inventories.stream()
                 .collect(Collectors.groupingBy(RoomInventory::getRoomTypeId));
 
-        // 4. 计算每晚所需天数
-        long nights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
-
-        // 5. 组装结果
+        // 6. 组装结果
         List<Map<String, Object>> result = new ArrayList<>();
         for (RoomType room : activeRooms) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("roomType", room);
 
             List<RoomInventory> roomInvList = inventoryMap.get(room.getId());
-            if (roomInvList == null) {
-                item.put("available", false);
-                item.put("minAvailable", 0);
+            if (roomInvList == null || roomInvList.isEmpty()) {
+                item.put("available", true);
+                item.put("minAvailable", room.getTotalQuantity());
                 item.put("totalNights", nights);
                 item.put("totalPrice", room.getPrice().multiply(java.math.BigDecimal.valueOf(nights)));
                 item.put("inventoryList", Collections.emptyList());
@@ -285,6 +305,18 @@ public class RoomService {
         result.put("roomType", roomType);
 
         if (checkInDate != null && checkOutDate != null) {
+            // 自动补齐缺失的库存记录
+            List<LocalDate> neededDates = checkInDate.datesUntil(checkOutDate).toList();
+            for (LocalDate date : neededDates) {
+                if (roomInventoryRepository.findByRoomTypeIdAndInventoryDate(roomTypeId, date).isEmpty()) {
+                    RoomInventory inv = new RoomInventory();
+                    inv.setRoomTypeId(roomTypeId);
+                    inv.setInventoryDate(date);
+                    inv.setAvailableQuantity(roomType.getTotalQuantity());
+                    roomInventoryRepository.save(inv);
+                }
+            }
+
             List<RoomInventory> inventories = getInventoryByDateRange(
                     roomTypeId, checkInDate, checkOutDate.minusDays(1));
             result.put("inventoryList", inventories);
